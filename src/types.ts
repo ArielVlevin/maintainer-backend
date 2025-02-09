@@ -56,8 +56,6 @@ export interface IUser extends Document {
   /**
    * Unique Google ID of the user (Required)
    */
-  googleId: string;
-
   /**
    * Full name of the user (Required)
    */
@@ -71,7 +69,7 @@ export interface IUser extends Document {
   /**
    * Profile picture URL of the user (Optional)
    */
-  picture?: string;
+  image: string;
 
   /**
    * Role of the user - Determines user permissions
@@ -89,4 +87,8 @@ export interface IUser extends Document {
    * Date when the user was created in the system
    */
   createdAt: Date;
+
+  profileCompleted: boolean;
+
+  emailVerified: boolean | null;
 }

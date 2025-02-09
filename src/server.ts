@@ -8,6 +8,7 @@ import upload from "./routes/upload";
 import path from "path";
 import fs from "fs";
 import productRoutes from "./routes/productRoutes";
+import authRoutes from "./routes/authRoutes";
 
 dotenv.config();
 
@@ -48,6 +49,7 @@ app.get("/uploads/products/:imageName", (req, res) => {
 app.use("/api/products", productRoutes); // Routes for product operations
 app.use("/api/tasks", taskRoutes); // Routes for task operations
 app.use("/api/upload", upload); // Routes for file uploads
+app.use("/api/auth", authRoutes); // Routes for auth
 
 /**
  * @route Any

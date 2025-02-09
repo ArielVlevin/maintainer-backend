@@ -55,7 +55,7 @@ export const createProduct = async (req: AuthRequest, res: Response) => {
  * @desc    Fetch products with pagination and filtering
  * @access  Public
  */
-export const getProducts = async (req: Request, res: Response) => {
+export const getProducts = async (req: AuthRequest, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;

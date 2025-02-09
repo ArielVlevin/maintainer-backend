@@ -10,15 +10,6 @@ import { IUser } from "../types";
 const UserSchema = new Schema<IUser>(
   {
     /**
-     * Unique identifier from Google OAuth (Required)
-     */
-    googleId: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-
-    /**
      * Full name of the user (Required)
      */
     name: {
@@ -40,7 +31,7 @@ const UserSchema = new Schema<IUser>(
      * Profile picture URL (Optional)
      * Defaults to an empty string if no picture is provided.
      */
-    picture: {
+    image: {
       type: String,
       default: "",
     },
@@ -52,7 +43,6 @@ const UserSchema = new Schema<IUser>(
     role: {
       type: String,
       enum: ["user", "admin"],
-      default: "user",
     },
 
     /**
@@ -74,7 +64,9 @@ const UserSchema = new Schema<IUser>(
       type: Date,
       default: Date.now,
     },
+    profileCompleted: { type: Boolean, default: false },
   },
+
   {
     timestamps: true, // Adds createdAt and updatedAt fields automatically
   }
