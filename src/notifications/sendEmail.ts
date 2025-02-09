@@ -87,7 +87,7 @@ async function sendEmailWithTemplate({
 
 // Example usage:
 sendEmailWithTemplate({
-  to: "ariel.v.levin@gmail.com",
+  to: process.env.MY_EMAIL!,
   template_id: "care",
   dynamicData: {
     subject: "Time to take care of your products!",

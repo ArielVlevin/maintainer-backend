@@ -26,7 +26,7 @@ export async function sendWhatsAppMessage(
 ): Promise<void> {
   try {
     const message = await client.messages.create({
-      from: "whatsapp:+18317865809", // Twilio WhatsApp sender number
+      from: process.env.TWILIO_WHATSAPP_NUMBER, // Twilio WhatsApp sender number
       to: to, // Recipient number with "whatsapp:" prefix
       body: messageBody, // Message content
     });
@@ -42,6 +42,6 @@ export async function sendWhatsAppMessage(
 
 // 📌 Example usage: Sending a test message via WhatsApp
 sendWhatsAppMessage(
-  "whatsapp:+972545288703",
+  process.env.MY_NUMBER!,
   "🚀 Message from Twilio with TypeScript!"
 );
