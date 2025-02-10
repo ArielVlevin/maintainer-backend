@@ -1,5 +1,5 @@
 import express from "express";
-import { verifyUser } from "../controllers/authController";
+import { verifyUser, getUserById } from "../controllers/authController";
 import { verifyToken } from "../middlewares/authMiddleware";
 
 const router = express.Router();
@@ -13,5 +13,6 @@ const router = express.Router();
  * It checks if the user exists in the database and ensures required fields are set correctly.
  */
 router.post("/verify-user", verifyUser);
+router.get("/:userId", verifyToken, getUserById);
 
 export default router;

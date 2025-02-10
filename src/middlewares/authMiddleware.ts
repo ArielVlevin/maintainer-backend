@@ -36,7 +36,6 @@ export const verifyToken = async (
         email: string;
       };
 
-      // 🔹 חיפוש המשתמש במסד הנתונים
       let user = await User.findById(decoded._id);
 
       if (!user) {
@@ -44,7 +43,6 @@ export const verifyToken = async (
         return;
       }
 
-      // ✅ הוספת המשתמש לבקשה
       req.user = user;
       next();
     } catch (error) {

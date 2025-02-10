@@ -61,20 +61,23 @@ export const getProducts = async (req: AuthRequest, res: Response) => {
     const limit = parseInt(req.query.limit as string) || 10;
     const search = req.query.search as string | undefined;
     const category = req.query.category as string | undefined;
-    const fields = req.query.fields as string | undefined; // Selected fields
+    const fields = req.query.fields as string | undefined;
+    const userOnly = req.query.userOnly === "true";
 
     const skip = (page - 1) * limit;
 
+    console.log("req.user: ", req.user);
     // Dynamic query object
     const query: any = {};
     if (search) query.name = { $regex: search, $options: "i" }; // Search by name
     if (category) query.category = category; // Filter by category
+    if (userOnly && req.user?._id) query.user_id = req.user._id; // Filter by user
 
     // Selecting specific fields if requested
     const projection = fields ? fields.split(",").join(" ") + " _id" : "";
 
     const products = await Product.find(query)
-      .select(projection) // Limit selected fields
+      .select(projection)
       .skip(skip)
       .limit(limit)
       .exec();

@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { User } from "../models/User";
+import { AuthRequest } from "../middlewares/authMiddleware";
 
 /**
  * @controller verifyUser
@@ -19,10 +20,10 @@ import { User } from "../models/User";
  */
 export const verifyUser = async (req: Request, res: Response) => {
   try {
-    const { _id, name, email, image, emailVerified } = req.body;
+    const { _id, name, email } = req.body;
 
     // ✅ Validate request payload
-    if (!_id || !email) {
+    if (!_id || !email || !name) {
       res.status(400).json({ error: "Missing required user data" });
       return;
     }
@@ -36,26 +37,24 @@ export const verifyUser = async (req: Request, res: Response) => {
     }
 
     if (user) {
-      console.log("user: ", user);
-      // ✅ If user already has a `role`, assume it's not a first-time login
+      /*✅ If user already has a `role`, assume it's not a first-time login
       if (user.role) {
         res
           .status(200)
           .json({ message: "User exists, no update needed", user });
         return;
-      }
+      }*/
 
       //console.log("🔄 First-time login detected, updating missing fields...");
 
       // 🛠 Fields to update (only if missing)
       const fieldsToUpdate = {
-        name: user.name || name,
-        image: user.image || image,
-        role: "user",
+        name: name || user.name,
+        role: user.role || "user",
         createdAt: user.createdAt || new Date(),
         products: user.products || [],
-        emailVerified: user.emailVerified || emailVerified || false,
-        profileCompleted: false,
+        emailVerified: user.emailVerified || false,
+        profileCompleted: true,
       };
 
       await User.updateOne({ _id: user._id }, { $set: fieldsToUpdate });
@@ -72,6 +71,37 @@ export const verifyUser = async (req: Request, res: Response) => {
     return;
   } catch (error) {
     console.error("❌ Error verifying user:", error);
+    res.status(500).json({ error: "Internal server error" });
+    return;
+  }
+};
+
+/**
+ * @controller getUserById
+ * @desc    Retrieves a user from the database based on user ID.
+ * @route   GET /api/users/:userId
+ * @access  Private (requires authentication)
+ *
+ * @param {Request} req - Express request object with params.userId
+ * @param {Response} res - Express response object
+ * @returns {Response} - JSON response with user data or error message
+ */
+export const getUserById = async (req: AuthRequest, res: Response) => {
+  try {
+    const { _id } = req.user!;
+
+    const user = await User.findById(_id);
+
+    if (!user) {
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
+
+    // ✅ מחזיר את הנתונים של המשתמש
+    res.status(200).json(user);
+    return;
+  } catch (error) {
+    console.error("❌ Error fetching user:", error);
     res.status(500).json({ error: "Internal server error" });
     return;
   }
