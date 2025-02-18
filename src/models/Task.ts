@@ -19,6 +19,12 @@ const TaskSchema = new Schema<ITask>({
     required: true,
   },
 
+  user_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+
   /**
    * Name of the maintenance task (Required)
    */

@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { User } from "../models/User";
 import { AuthRequest } from "../middlewares/authMiddleware";
+import jwt, { JwtPayload, VerifyErrors } from "jsonwebtoken";
 
 /**
  * @controller verifyUser

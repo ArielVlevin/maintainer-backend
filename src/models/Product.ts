@@ -18,7 +18,7 @@ const ProductSchema = new Schema<IProduct>({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
-  }, // Store the user ID
+  },
 
   /**
    * Category of the product (Optional)
@@ -48,7 +48,7 @@ const ProductSchema = new Schema<IProduct>({
   /**
    * Array of maintenance task IDs associated with the product
    */
-  taskIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "Task" }],
+  tasks: [{ type: mongoose.Schema.Types.ObjectId, ref: "Task" }],
 
   /**
    * The most recent maintenance task performed on this product
@@ -76,10 +76,10 @@ const ProductSchema = new Schema<IProduct>({
  * 4. Updates `lastOverallMaintenance` and `nextOverallMaintenance` fields accordingly.
  */
 ProductSchema.pre("save", async function (next) {
-  if (this.taskIds.length > 0) {
+  if (this.tasks.length > 0) {
     const tasks = await mongoose
       .model("Task")
-      .find({ _id: { $in: this.taskIds } });
+      .find({ _id: { $in: this.tasks } });
 
     // Find the most recently completed maintenance task
     const lastTask = tasks

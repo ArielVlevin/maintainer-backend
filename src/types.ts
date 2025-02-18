@@ -8,6 +8,9 @@ export interface ITask extends Document {
   _id?: mongoose.Types.ObjectId | string; // Unique identifier
 
   product_id: mongoose.Types.ObjectId | string; // Reference to the product
+
+  user_id: mongoose.Types.ObjectId | string;
+
   taskName: string; // Name of the maintenance task
   description?: string; // Optional: Task description
   lastMaintenance: Date; // Last maintenance date
@@ -31,7 +34,7 @@ export interface IProduct extends Document {
   tags?: string[]; // Optional: Product tags for categorization
   purchaseDate?: Date; // Optional: Purchase date of the product
 
-  taskIds: mongoose.Types.ObjectId[]; // Array of maintenance task IDs associated with the product
+  tasks: mongoose.Types.ObjectId[]; // Array of maintenance task IDs associated with the product
 
   lastOverallMaintenance?: mongoose.Types.ObjectId | ITask; // Reference to the last completed maintenance task
   nextOverallMaintenance?: mongoose.Types.ObjectId | ITask; // Reference to the next upcoming maintenance task

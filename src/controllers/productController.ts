@@ -66,7 +66,6 @@ export const getProducts = async (req: AuthRequest, res: Response) => {
 
     const skip = (page - 1) * limit;
 
-    console.log("req.user: ", req.user);
     // Dynamic query object
     const query: any = {};
     if (search) query.name = { $regex: search, $options: "i" }; // Search by name
@@ -80,8 +79,10 @@ export const getProducts = async (req: AuthRequest, res: Response) => {
       .select(projection)
       .skip(skip)
       .limit(limit)
+      .populate("taskIds")
+      .populate("lastOverallMaintenance")
+      .populate("nextOverallMaintenance")
       .exec();
-
     const total = await Product.countDocuments(query);
 
     res.json({

@@ -1,7 +1,7 @@
 import { Router } from "express";
 import {
   createTask,
-  getAllTasks,
+  getUserTasks,
   getTaskById,
   updateTask,
   deleteTask,
@@ -24,10 +24,10 @@ router.post("/:product_id", verifyToken, createTask);
 
 /**
  * @route GET /tasks
- * @description Retrieves all tasks in the system.
+ * @description Retrieves all user tasks by req.
  * @access Public
  */
-router.get("/", verifyToken, getAllTasks);
+router.get("/", verifyToken, getUserTasks);
 
 /**
  * @route GET /tasks/:taskId

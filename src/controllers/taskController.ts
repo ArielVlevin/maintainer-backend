@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { Task } from "../models/Task";
 import { Product } from "../models/Product";
 import mongoose from "mongoose";
+import { AuthRequest } from "../middlewares/authMiddleware";
 
 /**
  * @route   POST /tasks/:product_id
@@ -9,7 +10,7 @@ import mongoose from "mongoose";
  * @access  Public
  */
 export const createTask = async (
-  req: Request,
+  req: AuthRequest,
   res: Response
 ): Promise<void> => {
   try {
@@ -23,6 +24,11 @@ export const createTask = async (
       return;
     }
 
+    if (!req.user) {
+      res.status(401).json({ error: "Unauthorized: No user found" });
+      return;
+    }
+
     // Calculate next maintenance date
     const nextMaintenance = new Date(lastMaintenance);
     nextMaintenance.setDate(nextMaintenance.getDate() + frequency);
@@ -30,6 +36,7 @@ export const createTask = async (
     // Create new task
     const newTask = new Task({
       product_id,
+      user_id: req.user._id,
       taskName,
       description,
       lastMaintenance,
@@ -40,7 +47,7 @@ export const createTask = async (
     await newTask.save();
 
     // Add task to the product's task list
-    product.taskIds.push(newTask._id as mongoose.Types.ObjectId);
+    product.tasks.push(newTask._id as mongoose.Types.ObjectId);
     await product.save();
 
     res
@@ -49,26 +56,6 @@ export const createTask = async (
   } catch (error) {
     res.status(500).json({
       error: "Error creating task",
-      details: (error as Error).message,
-    });
-  }
-};
-
-/**
- * @route   GET /tasks
- * @desc    Fetch all maintenance tasks
- * @access  Public
- */
-export const getAllTasks = async (
-  _req: Request,
-  res: Response
-): Promise<void> => {
-  try {
-    const tasks = await Task.find();
-    res.json(tasks);
-  } catch (error) {
-    res.status(500).json({
-      error: "Error fetching tasks",
       details: (error as Error).message,
     });
   }
@@ -98,6 +85,46 @@ export const getTaskById = async (
       error: "Error fetching task",
       details: (error as Error).message,
     });
+  }
+};
+
+/**
+ * @route   GET /tasks
+ * @desc    Fetch all maintenance tasks for the logged-in user
+ * @access  Private (Requires Authentication)
+ */
+export const getUserTasks = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ error: "Unauthorized: User not found" });
+      return;
+    }
+
+    const userId = req.user._id;
+
+    // ✅ Pagination
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    // ✅ Fetch tasks for the user with sorting & pagination
+    const tasks = await Task.find({ user_id: userId })
+      .sort({ nextMaintenance: 1 }) // Sort by next maintenance date
+      .skip(skip)
+      .limit(limit);
+
+    // ✅ Total task count for pagination info
+    const total = await Task.countDocuments({ user_id: userId });
+
+    res.status(200).json({
+      tasks,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+    });
+  } catch (error) {
+    console.error("❌ Error fetching user tasks:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
