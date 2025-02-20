@@ -9,6 +9,7 @@ import path from "path";
 import fs from "fs";
 import productRoutes from "./routes/productRoutes";
 import authRoutes from "./routes/authRoutes";
+import { errorHandler } from "./middlewares/errorHandler";
 
 dotenv.config();
 
@@ -24,6 +25,8 @@ app.use(cors()); // Enables CORS for cross-origin requests
 
 // ✅ Connect to MongoDB
 connectDB();
+
+app.use(errorHandler);
 
 // ✅ Serve static files (uploaded images)
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));

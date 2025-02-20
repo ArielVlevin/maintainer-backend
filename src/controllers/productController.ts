@@ -1,8 +1,9 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { Product } from "../models/Product";
 import { Task } from "../models/Task";
 import { AuthRequest } from "../middlewares/authMiddleware";
 import { User } from "../models/User";
+import mongoose from "mongoose";
 
 /**
  * @route   POST /products
@@ -31,7 +32,7 @@ export const createProduct = async (req: AuthRequest, res: Response) => {
       model,
       tags: tags ? tags.split(",").map((tag: string) => tag.trim()) : [],
       purchaseDate,
-      taskIds: [],
+      tasks: [],
       iconUrl: url,
     });
 
@@ -49,51 +50,85 @@ export const createProduct = async (req: AuthRequest, res: Response) => {
     });
   }
 };
-
 /**
- * @route   GET /products
- * @desc    Fetch products with pagination and filtering
- * @access  Public
+ * @route   GET /api/products
+ * @desc    Fetch products with pagination, filtering, and field selection.
+ * @access  Public (or User-only filtering with authentication)
  */
-export const getProducts = async (req: AuthRequest, res: Response) => {
+export const getProducts = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
   try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
-    const search = req.query.search as string | undefined;
-    const category = req.query.category as string | undefined;
-    const fields = req.query.fields as string | undefined;
-    const userOnly = req.query.userOnly === "true";
+    const {
+      productId,
+      page = "1",
+      limit = "10",
+      search,
+      category,
+      fields,
+      userOnly,
+    } = req.query;
 
-    const skip = (page - 1) * limit;
+    // ✅ Ensure valid pagination numbers
+    const pageNumber = Math.max(parseInt(page as string, 10), 1);
+    const limitNumber = Math.max(parseInt(limit as string, 10), 1);
+    const skip = (pageNumber - 1) * limitNumber;
 
-    // Dynamic query object
+    // ✅ If `productId` is provided, fetch a **specific product**.
+    if (productId) {
+      if (!mongoose.isValidObjectId(productId))
+        throw new Error("Invalid Product ID");
+
+      const product = await Product.findById(productId)
+        .populate("tasks")
+        .populate("lastOverallMaintenance")
+        .populate("nextOverallMaintenance")
+        .lean();
+
+      console.log("product: ", product);
+
+      if (!product) throw new Error("Product not found");
+
+      res.status(200).json({ success: true, data: product });
+      return;
+    }
+
+    // ✅ Build dynamic filtering options
     const query: any = {};
-    if (search) query.name = { $regex: search, $options: "i" }; // Search by name
-    if (category) query.category = category; // Filter by category
-    if (userOnly && req.user?._id) query.user_id = req.user._id; // Filter by user
+    if (search) query.name = { $regex: search, $options: "i" }; // Case-insensitive search
+    if (category) query.category = category; // Category filter
+    if (userOnly === "true" && req.user?._id) query.user_id = req.user._id; // Fetch user's products
 
-    // Selecting specific fields if requested
-    const projection = fields ? fields.split(",").join(" ") + " _id" : "";
+    // ✅ Select specific fields if requested
+    const fieldsParam = Array.isArray(fields) ? fields[0] : fields;
+    const projection = fieldsParam
+      ? fieldsParam.toString().split(",").join(" ") + " _id"
+      : "";
 
+    // ✅ Fetch products with pagination & filtering
     const products = await Product.find(query)
       .select(projection)
       .skip(skip)
-      .limit(limit)
-      .populate("taskIds")
+      .limit(limitNumber)
+      .populate("tasks")
       .populate("lastOverallMaintenance")
       .populate("nextOverallMaintenance")
-      .exec();
+      .lean();
+
     const total = await Product.countDocuments(query);
 
-    res.json({
-      products,
+    res.status(200).json({
+      success: true,
+      items: products,
       total,
-      page,
-      totalPages: Math.ceil(total / limit),
+      page: pageNumber,
+      totalPages: Math.ceil(total / limitNumber),
     });
+    return;
   } catch (error) {
-    console.error("❌ Error fetching products:", error);
-    res.status(500).json({ error: "Internal server error" });
+    next(error); // 🔥 Pass error to global error middleware
   }
 };
 
@@ -106,7 +141,7 @@ export const getProductById = async (req: Request, res: Response) => {
   try {
     const { product_id } = req.params;
     const product = await Product.findById(product_id)
-      .populate("taskIds")
+      .populate("tasks")
       .populate("lastOverallMaintenance")
       .populate("nextOverallMaintenance");
 
@@ -119,25 +154,6 @@ export const getProductById = async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({
       error: "Error fetching product",
-      details: (error as Error).message,
-    });
-  }
-};
-
-/**
- * @route   GET /products/:product_id/tasks
- * @desc    Fetch tasks of a specific product
- * @access  Public
- */
-export const getProductTasks = async (req: Request, res: Response) => {
-  try {
-    const { product_id } = req.params;
-    const tasks = await Task.find({ product_id });
-
-    res.json(tasks);
-  } catch (error) {
-    res.status(500).json({
-      error: "Error fetching tasks",
       details: (error as Error).message,
     });
   }
@@ -214,3 +230,22 @@ export const getCategories = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Error fetching categories" });
   }
 };
+
+/**
+ * @route   GET /products/:product_id/tasks
+ * @desc    Fetch tasks of a specific product
+ * @access  Public
+ 
+export const getProductTasks = async (req: Request, res: Response) => {
+  try {
+    const { product_id } = req.params;
+    const tasks = await Task.find({ product_id });
+
+    res.json(tasks);
+  } catch (error) {
+    res.status(500).json({
+      error: "Error fetching tasks",
+      details: (error as Error).message,
+    });
+  }
+};*/

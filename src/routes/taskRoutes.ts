@@ -1,10 +1,9 @@
 import { Router } from "express";
 import {
   createTask,
-  getUserTasks,
-  getTaskById,
   updateTask,
   deleteTask,
+  getTasks,
 } from "../controllers/taskController";
 import { verifyToken } from "../middlewares/authMiddleware";
 
@@ -27,15 +26,7 @@ router.post("/:product_id", verifyToken, createTask);
  * @description Retrieves all user tasks by req.
  * @access Public
  */
-router.get("/", verifyToken, getUserTasks);
-
-/**
- * @route GET /tasks/:taskId
- * @description Retrieves a specific task by its ID.
- * @param {string} taskId - The ID of the task to retrieve.
- * @access Public
- */
-router.get("/:taskId", verifyToken, getTaskById);
+router.get("/", verifyToken, getTasks);
 
 /**
  * @route PUT /tasks/:taskId

@@ -3,7 +3,6 @@ import {
   createProduct,
   getProducts,
   getProductById,
-  getProductTasks,
   updateProduct,
   deleteProduct,
   getCategories,
@@ -42,14 +41,6 @@ router.get("/categories", verifyToken, getCategories);
  * @access Public
  */
 router.get("/:product_id", verifyToken, getProductById);
-
-/**
- * @route GET /products/:product_id/tasks
- * @description Retrieves all maintenance tasks associated with a product.
- * @param product_id - The ID of the product whose tasks are to be fetched.
- * @access Public
- */
-router.get("/:product_id/tasks", verifyToken, getProductTasks);
 
 /**
  * @route PUT /products/:product_id
