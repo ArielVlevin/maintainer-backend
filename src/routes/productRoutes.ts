@@ -2,7 +2,6 @@ import { Router } from "express";
 import {
   createProduct,
   getProducts,
-  getProductById,
   updateProduct,
   deleteProduct,
   getCategories,
@@ -33,14 +32,6 @@ router.get("/", verifyToken, getProducts);
  * @access Public
  */
 router.get("/categories", verifyToken, getCategories);
-
-/**
- * @route GET /products/:product_id
- * @description Retrieves a specific product by its ID.
- * @param product_id - The ID of the product to retrieve.
- * @access Public
- */
-router.get("/:product_id", verifyToken, getProductById);
 
 /**
  * @route PUT /products/:product_id

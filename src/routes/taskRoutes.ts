@@ -4,6 +4,8 @@ import {
   updateTask,
   deleteTask,
   getTasks,
+  completeTask,
+  postponeTask,
 } from "../controllers/taskController";
 import { verifyToken } from "../middlewares/authMiddleware";
 
@@ -43,5 +45,10 @@ router.put("/:taskId", verifyToken, updateTask);
  * @access Public
  */
 router.delete("/:taskId", verifyToken, deleteTask);
+// ✅ Route to mark a task as completed
+router.patch("/:taskId/complete", verifyToken, completeTask);
+
+// ✅ Route to postpone a task
+router.patch("/:taskId/postpone", verifyToken, postponeTask);
 
 export default router;

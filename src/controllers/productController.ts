@@ -30,7 +30,7 @@ export const createProduct = async (req: AuthRequest, res: Response) => {
       category,
       manufacturer,
       model,
-      tags: tags ? tags.split(",").map((tag: string) => tag.trim()) : [],
+      tags: tags, //todo: repair? tags.split(",").map((tag: string) => tag.trim()) : [],
       purchaseDate,
       tasks: [],
       iconUrl: url,
@@ -63,6 +63,7 @@ export const getProducts = async (
   try {
     const {
       productId,
+      slug,
       page = "1",
       limit = "10",
       search,
@@ -70,6 +71,8 @@ export const getProducts = async (
       fields,
       userOnly,
     } = req.query;
+
+    console.log("📢 Incoming Request:", req.query);
 
     // ✅ Ensure valid pagination numbers
     const pageNumber = Math.max(parseInt(page as string, 10), 1);
@@ -82,16 +85,37 @@ export const getProducts = async (
         throw new Error("Invalid Product ID");
 
       const product = await Product.findById(productId)
-        .populate("tasks")
+        //.populate("tasks") //todo - maybe delete later - its for tasks fetch
         .populate("lastOverallMaintenance")
         .populate("nextOverallMaintenance")
         .lean();
 
-      console.log("product: ", product);
+      if (!product) throw new Error("Product not found");
+
+      res.status(200).json({
+        success: true,
+        items: [product],
+        total: 1,
+        page: 1,
+        totalPages: 1,
+      });
+      return;
+    }
+    if (!productId && slug) {
+      const product = await Product.findOne({ slug })
+        .populate("lastOverallMaintenance")
+        .populate("nextOverallMaintenance")
+        .lean();
 
       if (!product) throw new Error("Product not found");
 
-      res.status(200).json({ success: true, data: product });
+      res.status(200).json({
+        success: true,
+        items: [product],
+        total: 1,
+        page: 1,
+        totalPages: 1,
+      });
       return;
     }
 
@@ -128,34 +152,7 @@ export const getProducts = async (
     });
     return;
   } catch (error) {
-    next(error); // 🔥 Pass error to global error middleware
-  }
-};
-
-/**
- * @route   GET /products/:product_id
- * @desc    Fetch a product by ID including its tasks
- * @access  Public
- */
-export const getProductById = async (req: Request, res: Response) => {
-  try {
-    const { product_id } = req.params;
-    const product = await Product.findById(product_id)
-      .populate("tasks")
-      .populate("lastOverallMaintenance")
-      .populate("nextOverallMaintenance");
-
-    if (!product) {
-      res.status(404).json({ error: "Product not found" });
-      return;
-    }
-
-    res.json(product);
-  } catch (error) {
-    res.status(500).json({
-      error: "Error fetching product",
-      details: (error as Error).message,
-    });
+    next(error);
   }
 };
 
@@ -195,7 +192,7 @@ export const updateProduct = async (req: Request, res: Response) => {
 export const deleteProduct = async (req: Request, res: Response) => {
   try {
     const { product_id } = req.params;
-    const deletedProduct = await Product.findByIdAndDelete(product_id);
+    const deletedProduct = await Product.findOneAndDelete({ _id: product_id });
 
     if (!deletedProduct) {
       res.status(404).json({ error: "Product not found" });

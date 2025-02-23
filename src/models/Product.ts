@@ -1,6 +1,31 @@
-import mongoose, { Schema, Model } from "mongoose";
-import { IProduct } from "../types";
+/**
+ * @interface IProduct
+ * @description Represents a product that requires maintenance.
+ */
+export interface IProduct extends Document {
+  _id?: mongoose.Types.ObjectId | string; // Unique identifier
+  name: string; // Product name
+  slug: string;
+  user_id: mongoose.Types.ObjectId | string;
 
+  category?: string; // Optional: Product category
+  manufacturer?: string; // Optional: Manufacturer name
+  model?: string; // Optional: Product model
+  tags?: string[]; // Optional: Product tags for categorization
+  purchaseDate?: Date; // Optional: Purchase date of the product
+
+  tasks: mongoose.Types.ObjectId[]; // Array of maintenance task IDs associated with the product
+
+  lastOverallMaintenance?: mongoose.Types.ObjectId | ITask; // Reference to the last completed maintenance task
+  nextOverallMaintenance?: mongoose.Types.ObjectId | ITask; // Reference to the next upcoming maintenance task
+
+  iconUrl?: string; // URL for the product's icon or image
+}
+
+import mongoose, { Schema, Model } from "mongoose";
+import { ITask, Task } from "./Task";
+import { logAction } from "../lib/logAction";
+import slugify from "slugify";
 /**
  * Product Schema - Defines the structure of the product document in MongoDB.
  *
@@ -13,7 +38,7 @@ const ProductSchema = new Schema<IProduct>({
    * Product name (Required)
    */
   name: { type: String, required: true },
-
+  slug: { type: String, unique: true },
   user_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
@@ -76,6 +101,19 @@ const ProductSchema = new Schema<IProduct>({
  * 4. Updates `lastOverallMaintenance` and `nextOverallMaintenance` fields accordingly.
  */
 ProductSchema.pre("save", async function (next) {
+  if (this.isModified("name") || !this.slug) {
+    let baseSlug = slugify(this.name, { lower: true, strict: true });
+    let slug = baseSlug;
+    let counter = 1;
+
+    // 🔄 בדיקה אם `slug` כבר קיים
+    while (await mongoose.model("Product").exists({ slug })) {
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+
+    this.slug = slug;
+  }
   if (this.tasks.length > 0) {
     const tasks = await mongoose
       .model("Task")
@@ -104,6 +142,47 @@ ProductSchema.pre("save", async function (next) {
   }
 
   next();
+});
+
+ProductSchema.pre("findOneAndDelete", async function (next) {
+  const product = await this.model.findOne(this.getQuery());
+
+  if (product) {
+    await Task.deleteMany({ product_id: product._id });
+    console.log(
+      `✅ All tasks linked to product ${product._id} have been deleted.`
+    );
+  }
+
+  next();
+});
+
+/**
+ * Automatically logs product creation and updates.
+ */
+ProductSchema.post("save", async function (doc) {
+  return await logAction(
+    doc.user_id as string,
+    "UPDATE",
+    "PRODUCT",
+    doc._id as string,
+    `Product "${doc.name}" was updated or created`
+  );
+});
+
+/**
+ * Automatically logs product deletion.
+ */
+ProductSchema.post("findOneAndDelete", async function (doc) {
+  if (doc) {
+    await logAction(
+      doc.user_id,
+      "DELETE",
+      "PRODUCT",
+      doc._id,
+      `Product "${doc.name}" was deleted`
+    );
+  }
 });
 
 /**
