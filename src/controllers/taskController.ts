@@ -15,7 +15,6 @@ export const createTask = async (
   res: Response
 ): Promise<void> => {
   try {
-    console.log("createTask");
     const { product_id } = req.params;
     const { taskName, description, lastMaintenance, frequency } = req.body;
 
@@ -89,7 +88,6 @@ export const getTasks = async (
     } = req.query;
     const skip = (parseInt(page as string) - 1) * parseInt(limit as string);
 
-    // ✅ אם נשלח `taskId` - נחפש את המשימה הספציפית
     if (taskId) {
       if (!mongoose.isValidObjectId(taskId)) throw new Error("Invalid Task ID");
 
@@ -97,7 +95,7 @@ export const getTasks = async (
         _id: taskId,
         user_id: userId,
       }).populate("product_id", "name category");
-      if (!task) throw new Error("Task not found");
+      if (!task) throw new Error("getTasks: Task not found");
 
       res.status(200).json({
         success: true,
@@ -154,7 +152,7 @@ export const updateTask = async (
     });
 
     if (!updatedTask) {
-      res.status(404).json({ error: "Task not found" });
+      res.status(404).json({ error: "updateTask: Task not found" });
       return;
     }
 
@@ -182,15 +180,20 @@ export const deleteTask = async (
     // Delete the task
     const deletedTask = await Task.findByIdAndDelete(taskId);
     if (!deletedTask) {
-      res.status(404).json({ error: "Task not found" });
+      res.status(404).json({ error: "deleteTask: Task not found" });
       return;
     }
 
-    // Remove the task from any products that referenced it
-    await Product.updateMany(
-      { taskIds: taskId },
-      { $pull: { taskIds: taskId } }
-    );
+    const affectedProducts = await Product.find({ tasks: taskId });
+
+    for (const product of affectedProducts) {
+      product.tasks = product.tasks.filter((id) => id.toString() !== taskId);
+      if (product.lastOverallMaintenance?.toString() === taskId)
+        product.lastOverallMaintenance = undefined;
+      if (product.nextOverallMaintenance?.toString() === taskId)
+        product.nextOverallMaintenance = undefined;
+      await product.save();
+    }
 
     res.json({ message: "Task deleted successfully" });
   } catch (error) {
@@ -223,40 +226,32 @@ export const completeTask = async (
         .json({ success: false, message: "Unauthorized: No user found" });
       return;
     }
-    // ✅ Validate task existence
-    const task = await Task.findById(taskId);
-    if (!task) {
-      res.status(404).json({ success: false, message: "Task not found" });
+    if (!taskId) {
+      res.status(400).json({ success: false, message: "Task ID is required" });
       return;
     }
 
-    // ✅ Update maintenance fields
-    const now = new Date();
-    task.lastMaintenance = now;
-    task.status = "completed"; // Mark as completed
-
-    // ✅ Set next maintenance date
-    if (task.frequency) {
-      const nextDate = new Date();
-      nextDate.setDate(now.getDate() + task.frequency);
-      task.nextMaintenance = nextDate;
-      task.status = "pending"; // Task is now waiting for next occurrence
+    const task = await Task.findById(taskId);
+    if (!task) {
+      res
+        .status(404)
+        .json({ success: false, message: "completeTask: Task not found" });
+      return;
     }
 
-    // ✅ Save updated task
+    if (task.user_id.toString() !== userId.toString()) {
+      res.status(403).json({ success: false, message: "Unauthorized" });
+      return;
+    }
+
+    // ✅ Update the task status to 'completed'
+    task.status = "completed";
+    task.lastMaintenance = new Date();
+    task.nextMaintenance = new Date(
+      Date.now() + task.frequency * 24 * 60 * 60 * 1000
+    ); // Set next maintenance date
+
     await task.save();
-
-    // ✅ Update product's maintenance status
-    if (task.product_id) {
-      await Product.findByIdAndUpdate(
-        task.product_id,
-        {
-          lastOverallMaintenance: new Date(),
-          nextOverallMaintenance: new Date(task.nextMaintenance),
-        },
-        { new: true }
-      );
-    }
 
     // ✅ Log action
     await logAction(
@@ -312,7 +307,9 @@ export const postponeTask = async (
 
     const task = await Task.findById(taskId);
     if (!task) {
-      res.status(404).json({ success: false, message: "Task not found" });
+      res
+        .status(404)
+        .json({ success: false, message: "postponeTask: Task not found" });
       return;
     }
 

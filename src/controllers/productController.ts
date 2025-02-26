@@ -72,8 +72,6 @@ export const getProducts = async (
       userOnly,
     } = req.query;
 
-    console.log("📢 Incoming Request:", req.query);
-
     // ✅ Ensure valid pagination numbers
     const pageNumber = Math.max(parseInt(page as string, 10), 1);
     const limitNumber = Math.max(parseInt(limit as string, 10), 1);
@@ -227,22 +225,3 @@ export const getCategories = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Error fetching categories" });
   }
 };
-
-/**
- * @route   GET /products/:product_id/tasks
- * @desc    Fetch tasks of a specific product
- * @access  Public
- 
-export const getProductTasks = async (req: Request, res: Response) => {
-  try {
-    const { product_id } = req.params;
-    const tasks = await Task.find({ product_id });
-
-    res.json(tasks);
-  } catch (error) {
-    res.status(500).json({
-      error: "Error fetching tasks",
-      details: (error as Error).message,
-    });
-  }
-};*/

@@ -38,16 +38,6 @@ export const verifyUser = async (req: Request, res: Response) => {
     }
 
     if (user) {
-      /*✅ If user already has a `role`, assume it's not a first-time login
-      if (user.role) {
-        res
-          .status(200)
-          .json({ message: "User exists, no update needed", user });
-        return;
-      }*/
-
-      //console.log("🔄 First-time login detected, updating missing fields...");
-
       // 🛠 Fields to update (only if missing)
       const fieldsToUpdate = {
         name: name || user.name,

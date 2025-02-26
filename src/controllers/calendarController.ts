@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { Task } from "../models/Task";
+import { Product } from "../models/Product"; // ✅ יבוא מודל המוצרים
 import { AuthRequest } from "../middlewares/authMiddleware";
 
 /**
@@ -17,14 +18,31 @@ export const getUserTasksCalendar = async (
       return;
     }
 
+    // ✅ שליפת המשימות של המשתמש
     const tasks = await Task.find({ user_id: userId }).lean();
 
+    // ✅ שליפת כל המוצרים הקשורים למשימות
+    const productIds = tasks.map((task) => task.product_id);
+    const products = await Product.find({ _id: { $in: productIds } })
+      .select("_id name")
+      .lean();
+
+    // ✅ יצירת מפת מוצרים לפי _id
+    const productMap = new Map(
+      products.map((prod) => [prod._id.toString(), prod.name])
+    );
+
+    // ✅ יצירת מבנה האירועים ללוח השנה
     const calendarEvents = tasks.map((task) => ({
-      id: task._id,
+      _id: task._id,
       title: task.taskName,
+      description: task.description,
       start: task.nextMaintenance,
       end: task.nextMaintenance,
-      product: task.product_id,
+      product: {
+        _id: task.product_id.toString(),
+        name: productMap.get(task.product_id.toString()) || "Unknown Product",
+      },
     }));
 
     res.json({ success: true, events: calendarEvents });
@@ -51,13 +69,23 @@ export const getProductTasksCalendar = async (
       return;
     }
 
+    // ✅ שליפת המשימות של המוצר הספציפי
     const tasks = await Task.find({ product_id: productId }).lean();
 
+    // ✅ שליפת שם המוצר
+    const product = await Product.findById(productId).select("_id name").lean();
+
+    // ✅ יצירת מבנה האירועים ללוח השנה
     const calendarEvents = tasks.map((task) => ({
-      id: task._id,
+      _id: task._id,
       title: task.taskName,
+      description: task.description,
       start: task.nextMaintenance,
       end: task.nextMaintenance,
+      product: {
+        _id: product?._id.toString() || "",
+        name: product?.name || "Unknown Product",
+      },
     }));
 
     res.json({ success: true, events: calendarEvents });

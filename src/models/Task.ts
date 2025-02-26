@@ -96,6 +96,8 @@ const TaskSchema = new Schema<ITask>({
 TaskSchema.pre("save", function (next) {
   const today = new Date();
 
+  if (this.status === "completed") return next();
+
   // ✅ If no `lastMaintenance`, the task is new or hasn't been completed yet
   if (!this.lastMaintenance) {
     this.status = "pending";

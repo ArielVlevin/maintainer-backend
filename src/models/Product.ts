@@ -106,7 +106,6 @@ ProductSchema.pre("save", async function (next) {
     let slug = baseSlug;
     let counter = 1;
 
-    // 🔄 בדיקה אם `slug` כבר קיים
     while (await mongoose.model("Product").exists({ slug })) {
       slug = `${baseSlug}-${counter}`;
       counter++;
