@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { User } from "../models/User";
 import { AuthRequest } from "../middlewares/authMiddleware";
 import jwt, { JwtPayload, VerifyErrors } from "jsonwebtoken";
@@ -8,62 +8,44 @@ import jwt, { JwtPayload, VerifyErrors } from "jsonwebtoken";
  * @desc    Handles user verification after OAuth sign-in.
  * @access  Public (called after authentication)
  *
- * This function ensures that the authenticated user exists in the database and has all required fields.
- *
- * 1️⃣ If the user exists and already has a `role`, no update is performed.
- * 2️⃣ If the user exists but lacks required fields (indicating a first-time login), those fields are populated.
- * 3️⃣ If the user is not found by `_id`, it attempts to find the user by `email`.
- * 4️⃣ If the user is still not found, it returns a `404` error.
+ * Ensures that the authenticated user exists in the database and has all required fields.
  *
  * @param {Request} req - The Express request object containing user details.
  * @param {Response} res - The Express response object.
+ * @param {NextFunction} next - Express next function for error handling.
  * @returns {Response} - JSON response with success or error message.
  */
-export const verifyUser = async (req: Request, res: Response) => {
+export const verifyUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { _id, name, email } = req.body;
 
-    // ✅ Validate request payload
-    if (!_id || !email || !name) {
-      res.status(400).json({ error: "Missing required user data" });
-      return;
-    }
+    if (!_id || !email || !name) throw new Error("Missing required user data");
 
-    // 🔍 Try finding the user by `_id` first
     let user = await User.findOne({ _id });
-
     if (!user) {
-      console.log("⚠️ User not found by _id, attempting to find by email...");
       user = await User.findOne({ email });
+      if (!user) throw new Error("User not found in database.");
     }
 
-    if (user) {
-      // 🛠 Fields to update (only if missing)
-      const fieldsToUpdate = {
-        name: name || user.name,
-        role: user.role || "user",
-        createdAt: user.createdAt || new Date(),
-        products: user.products || [],
-        emailVerified: user.emailVerified || false,
-        profileCompleted: true,
-      };
+    const fieldsToUpdate = {
+      name: name || user.name,
+      role: user.role || "user",
+      createdAt: user.createdAt || new Date(),
+      products: user.products || [],
+      emailVerified: user.emailVerified || false,
+      profileCompleted: true,
+    };
 
-      await User.updateOne({ _id: user._id }, { $set: fieldsToUpdate });
-
-      //console.log("✅ User updated successfully:", fieldsToUpdate);
-      res
-        .status(200)
-        .json({ message: "User profile completed", user: fieldsToUpdate });
-      return;
-    }
-
-    // ❌ User not found in database
-    res.status(404).json({ error: "User not found in database." });
-    return;
+    await User.updateOne({ _id: user._id }, { $set: fieldsToUpdate });
+    res
+      .status(200)
+      .json({ message: "User profile completed", user: fieldsToUpdate });
   } catch (error) {
-    console.error("❌ Error verifying user:", error);
-    res.status(500).json({ error: "Internal server error" });
-    return;
+    next(error);
   }
 };
 
@@ -73,27 +55,23 @@ export const verifyUser = async (req: Request, res: Response) => {
  * @route   GET /api/users/:userId
  * @access  Private (requires authentication)
  *
- * @param {Request} req - Express request object with params.userId
- * @param {Response} res - Express response object
- * @returns {Response} - JSON response with user data or error message
+ * @param {AuthRequest} req - Express request object with params.userId.
+ * @param {Response} res - Express response object.
+ * @param {NextFunction} next - Express next function for error handling.
+ * @returns {Response} - JSON response with user data or error message.
  */
-export const getUserById = async (req: AuthRequest, res: Response) => {
+export const getUserById = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { _id } = req.user!;
-
     const user = await User.findById(_id);
+    if (!user) throw new Error("User not found");
 
-    if (!user) {
-      res.status(404).json({ error: "User not found" });
-      return;
-    }
-
-    // ✅ מחזיר את הנתונים של המשתמש
     res.status(200).json(user);
-    return;
   } catch (error) {
-    console.error("❌ Error fetching user:", error);
-    res.status(500).json({ error: "Internal server error" });
-    return;
+    next(error);
   }
 };

@@ -157,34 +157,6 @@ ProductSchema.pre("findOneAndDelete", async function (next) {
 });
 
 /**
- * Automatically logs product creation and updates.
- */
-ProductSchema.post("save", async function (doc) {
-  return await logAction(
-    doc.user_id as string,
-    "UPDATE",
-    "PRODUCT",
-    doc._id as string,
-    `Product "${doc.name}" was updated or created`
-  );
-});
-
-/**
- * Automatically logs product deletion.
- */
-ProductSchema.post("findOneAndDelete", async function (doc) {
-  if (doc) {
-    await logAction(
-      doc.user_id,
-      "DELETE",
-      "PRODUCT",
-      doc._id,
-      `Product "${doc.name}" was deleted`
-    );
-  }
-});
-
-/**
  * Product Model - Exported for use in controllers and database interactions
  */
 export const Product: Model<IProduct> = mongoose.model<IProduct>(

@@ -3,9 +3,9 @@ import {
   createTask,
   updateTask,
   deleteTask,
-  getTasks,
   completeTask,
   postponeTask,
+  getTasks,
 } from "../controllers/taskController";
 import { verifyToken } from "../middlewares/authMiddleware";
 

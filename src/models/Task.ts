@@ -3,7 +3,7 @@
  * @description Represents a maintenance task for a product.
  */
 export interface ITask extends Document {
-  _id?: mongoose.Types.ObjectId | string; // Unique identifier
+  _id?: mongoose.Types.ObjectId; // Unique identifier
 
   product_id: mongoose.Types.ObjectId | string; // Reference to the product
 
@@ -118,34 +118,6 @@ TaskSchema.pre("save", function (next) {
   }
 
   next();
-});
-
-/**
- * Automatically logs task creation and updates.
- */
-TaskSchema.post("save", async function (doc) {
-  await logAction(
-    doc.user_id as string,
-    "UPDATE",
-    "TASK",
-    doc._id as string,
-    `Task "${doc.taskName}" was updated or created`
-  );
-});
-
-/**
- * Automatically logs task deletion.
- */
-TaskSchema.post("findOneAndDelete", async function (doc) {
-  if (doc) {
-    await logAction(
-      doc.user_id,
-      "DELETE",
-      "TASK",
-      doc._id,
-      `Task "${doc.taskName}" was deleted`
-    );
-  }
 });
 
 /**

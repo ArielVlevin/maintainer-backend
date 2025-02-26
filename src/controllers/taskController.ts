@@ -1,9 +1,12 @@
 import { NextFunction, Request, Response } from "express";
 import { Task } from "../models/Task";
-import { Product } from "../models/Product";
 import mongoose from "mongoose";
 import { AuthRequest } from "../middlewares/authMiddleware";
+import { findProductById, updateProductTasks } from "../utils/productUtils";
+import { findTaskById } from "../utils/taskUtil";
 import { logAction } from "../lib/logAction";
+import { addTimeToDate } from "../utils/dateUtils";
+import { validateUserAuth } from "../utils/validationUtils";
 
 /**
  * @route   POST /tasks/:product_id
@@ -12,23 +15,15 @@ import { logAction } from "../lib/logAction";
  */
 export const createTask = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
+  next: NextFunction
 ): Promise<void> => {
   try {
+    const userId = validateUserAuth(req);
     const { product_id } = req.params;
     const { taskName, description, lastMaintenance, frequency } = req.body;
 
-    // Check if the product exists
-    const product = await Product.findById(product_id);
-    if (!product) {
-      res.status(404).json({ error: "Product not found" });
-      return;
-    }
-
-    if (!req.user) {
-      res.status(401).json({ error: "Unauthorized: No user found" });
-      return;
-    }
+    const product = await findProductById(product_id);
 
     // Calculate next maintenance date
     const nextMaintenance = new Date(lastMaintenance);
@@ -37,7 +32,7 @@ export const createTask = async (
     // Create new task
     const newTask = new Task({
       product_id,
-      user_id: req.user._id,
+      user_id: userId,
       taskName,
       description,
       lastMaintenance,
@@ -48,7 +43,7 @@ export const createTask = async (
     await newTask.save();
 
     // Add task to the product's task list
-    product.tasks.push(newTask._id as mongoose.Types.ObjectId);
+    product.tasks.push(newTask._id);
     await product.save();
 
     res.status(201).json({
@@ -57,18 +52,78 @@ export const createTask = async (
       task: newTask,
     });
   } catch (error) {
-    res.status(500).json({
-      error: "Error creating task",
-      details: (error as Error).message,
+    next(error);
+  }
+};
+
+/**
+ * @route   PUT /tasks/:taskId
+ * @desc    Update an existing task
+ * @access  Public
+ */
+export const updateTask = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const userId = validateUserAuth(req);
+    const { taskId } = req.params;
+    const updatedTask = await Task.findByIdAndUpdate(taskId, req.body, {
+      new: true,
     });
+
+    if (!updatedTask) throw new Error("updateTask: Task not found");
+    res.json(updatedTask);
+
+    await logAction(
+      userId,
+      "UPDATE",
+      "TASK",
+      taskId,
+      `Task "${updatedTask.taskName}" was updated`
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @route   DELETE /tasks/:taskId
+ * @desc    Delete a task and remove its reference from associated products
+ */
+export const deleteTask = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const userId = validateUserAuth(req);
+
+    const { taskId } = req.params;
+    const deletedTask = await Task.findByIdAndDelete(taskId);
+    if (!deletedTask) throw new Error("Task not found");
+    await updateProductTasks(taskId, next);
+    res.json({ message: "Task deleted successfully" });
+
+    await logAction(
+      userId,
+      "DELETE",
+      "TASK",
+      taskId,
+      `Task "${deletedTask.taskName}" was deleted`
+    );
+  } catch (error) {
+    next(error);
   }
 };
 
 /**
  * Fetch tasks for the authenticated user with pagination, filtering, and task lookup by ID.
  *
- * @param {Request} req - Express request object.
+ * @param {AuthRequest} req - Express request object.
  * @param {Response} res - Express response object.
+ * @param {NextFunction} next - Express next function for error handling.
  */
 export const getTasks = async (
   req: AuthRequest,
@@ -76,8 +131,7 @@ export const getTasks = async (
   next: NextFunction
 ) => {
   try {
-    if (!req.user) throw new Error("Unauthorized: User not found");
-    const userId = req.user._id;
+    const userId = validateUserAuth(req);
     const {
       taskId,
       productId,
@@ -86,11 +140,11 @@ export const getTasks = async (
       status,
       search,
     } = req.query;
+
     const skip = (parseInt(page as string) - 1) * parseInt(limit as string);
 
     if (taskId) {
       if (!mongoose.isValidObjectId(taskId)) throw new Error("Invalid Task ID");
-
       const task = await Task.findOne({
         _id: taskId,
         user_id: userId,
@@ -104,33 +158,29 @@ export const getTasks = async (
         page: 1,
         totalPages: 1,
       });
-      return;
+    } else {
+      // Apply filters
+      const filter: any = { user_id: userId };
+      if (productId) filter.product_id = productId;
+      if (status) filter.status = status;
+      if (search) filter.taskName = { $regex: search, $options: "i" };
+
+      const tasks = await Task.find(filter)
+        .sort({ nextMaintenance: 1 }) // Upcoming tasks first
+        .skip(skip)
+        .limit(parseInt(limit as string))
+        .populate("product_id", "name category");
+
+      const total = await Task.countDocuments(filter);
+
+      res.status(200).json({
+        success: true,
+        items: tasks,
+        total,
+        page: parseInt(page as string),
+        totalPages: Math.ceil(total / parseInt(limit as string)),
+      });
     }
-
-    // ✅ אם לא - נשלוף לפי מסננים
-    const filter: any = { user_id: userId };
-    if (productId) filter.product_id = productId;
-    if (status) filter.status = status;
-
-    if (search) {
-      filter.taskName = { $regex: search, $options: "i" };
-    }
-
-    const tasks = await Task.find(filter)
-      .sort({ nextMaintenance: 1 }) // Upcoming tasks first
-      .skip(skip)
-      .limit(parseInt(limit as string))
-      .populate("product_id", "name category");
-
-    const total = await Task.countDocuments(filter);
-
-    res.status(200).json({
-      success: true,
-      items: tasks,
-      total,
-      page: parseInt(page as string),
-      totalPages: Math.ceil(total / parseInt(limit as string)),
-    });
   } catch (error) {
     next(error);
   }
@@ -138,78 +188,7 @@ export const getTasks = async (
 
 /**
  * @route   PUT /tasks/:taskId
- * @desc    Update an existing task
- * @access  Public
- */
-export const updateTask = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
-  try {
-    const { taskId } = req.params;
-    const updatedTask = await Task.findByIdAndUpdate(taskId, req.body, {
-      new: true,
-    });
-
-    if (!updatedTask) {
-      res.status(404).json({ error: "updateTask: Task not found" });
-      return;
-    }
-
-    res.json(updatedTask);
-  } catch (error) {
-    res.status(500).json({
-      error: "Error updating task",
-      details: (error as Error).message,
-    });
-  }
-};
-
-/**
- * @route   DELETE /tasks/:taskId
- * @desc    Delete a task and remove its reference from associated products
- * @access  Public
- */
-export const deleteTask = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
-  try {
-    const { taskId } = req.params;
-
-    // Delete the task
-    const deletedTask = await Task.findByIdAndDelete(taskId);
-    if (!deletedTask) {
-      res.status(404).json({ error: "deleteTask: Task not found" });
-      return;
-    }
-
-    const affectedProducts = await Product.find({ tasks: taskId });
-
-    for (const product of affectedProducts) {
-      product.tasks = product.tasks.filter((id) => id.toString() !== taskId);
-      if (product.lastOverallMaintenance?.toString() === taskId)
-        product.lastOverallMaintenance = undefined;
-      if (product.nextOverallMaintenance?.toString() === taskId)
-        product.nextOverallMaintenance = undefined;
-      await product.save();
-    }
-
-    res.json({ message: "Task deleted successfully" });
-  } catch (error) {
-    res.status(500).json({
-      error: "Error deleting task",
-      details: (error as Error).message,
-    });
-  }
-};
-
-/**
- * Marks a task as completed and updates the relevant maintenance dates.
- *
- * @param {Request} req - Express request object, containing the task ID in params.
- * @param {Response} res - Express response object.
- * @param {NextFunction} next - Express next function for error handling.
+ * @desc    Mark a task as completed and update maintenance dates.
  */
 export const completeTask = async (
   req: AuthRequest,
@@ -219,68 +198,33 @@ export const completeTask = async (
   try {
     const { taskId } = req.params;
     const userId = req.user?._id;
+    if (!userId) throw new Error("Unauthorized: No user found");
+    const task = await findTaskById(taskId, userId, next);
+    if (!task) return;
 
-    if (!userId) {
-      res
-        .status(401)
-        .json({ success: false, message: "Unauthorized: No user found" });
-      return;
-    }
-    if (!taskId) {
-      res.status(400).json({ success: false, message: "Task ID is required" });
-      return;
-    }
-
-    const task = await Task.findById(taskId);
-    if (!task) {
-      res
-        .status(404)
-        .json({ success: false, message: "completeTask: Task not found" });
-      return;
-    }
-
-    if (task.user_id.toString() !== userId.toString()) {
-      res.status(403).json({ success: false, message: "Unauthorized" });
-      return;
-    }
-
-    // ✅ Update the task status to 'completed'
     task.status = "completed";
     task.lastMaintenance = new Date();
-    task.nextMaintenance = new Date(
-      Date.now() + task.frequency * 24 * 60 * 60 * 1000
-    ); // Set next maintenance date
+    task.nextMaintenance = addTimeToDate(task.lastMaintenance, task.frequency);
 
     await task.save();
 
-    // ✅ Log action
     await logAction(
-      userId as string,
+      userId,
       "COMPLETE",
       "TASK",
-      task._id as string,
-      `Task "${task.taskName}" was marked as completed`
+      task._id.toString(),
+      `Task "${task.taskName}" was completed`
     );
-
     res.json({ success: true, message: "Task completed successfully", task });
   } catch (error) {
     next(error);
   }
 };
-/**
- * Postpone a task by updating its next maintenance date.
- *
- * @route PATCH /tasks/:taskId/postpone
- * @param {Request} req - Express request object containing task ID and days in the body.
- * @param {Response} res - Express response object.
- * @param {NextFunction} next - Express next function for error handling.
- * @returns {Promise<void>} - Returns success message and updated task.
- *
- * @example
- * PATCH /tasks/123/postpone { days: 7 }
- * Response: { success: true, message: "Task postponed by 7 days", task: {...} }
- */
 
+/**
+ * @route   PATCH /tasks/:taskId/postpone
+ * @desc    Postpone a task's next maintenance date.
+ */
 export const postponeTask = async (
   req: AuthRequest,
   res: Response,
@@ -290,54 +234,25 @@ export const postponeTask = async (
     const { taskId } = req.params;
     const { days } = req.body;
     const userId = req.user?._id;
+    if (!userId) throw new Error("Unauthorized: No user found");
+    if (!days || days < 1) throw new Error("Invalid days parameter");
+    const task = await findTaskById(taskId, userId, next);
+    if (!task) return;
+    task.nextMaintenance = addTimeToDate(task.nextMaintenance, days);
+    await task.save();
 
-    if (!userId) {
-      res
-        .status(401)
-        .json({ success: false, message: "Unauthorized: No user found" });
-      return;
-    }
-
-    if (!days || days < 1) {
-      res
-        .status(400)
-        .json({ success: false, message: "Invalid days parameter" });
-      return;
-    }
-
-    const task = await Task.findById(taskId);
-    if (!task) {
-      res
-        .status(404)
-        .json({ success: false, message: "postponeTask: Task not found" });
-      return;
-    }
-
-    // ✅ Update nextMaintenance correctly
-    const newNextMaintenance = new Date(task.nextMaintenance);
-    newNextMaintenance.setDate(newNextMaintenance.getDate() + days);
-
-    task.nextMaintenance = newNextMaintenance;
-
-    // ensure Mongoose detects the change
-    task.markModified("nextMaintenance");
-
-    const updatedTask = await task.save();
-
-    // ✅ Log the action
+    res.json({
+      success: true,
+      message: `Task postponed by ${days} days`,
+      task,
+    });
     await logAction(
-      userId as string,
+      userId,
       "UPDATE",
       "TASK",
       taskId,
       `Task "${task.taskName}" postponed by ${days} days`
     );
-
-    res.json({
-      success: true,
-      message: `Task postponed by ${days} days`,
-      task: updatedTask,
-    });
   } catch (error) {
     next(error);
   }
