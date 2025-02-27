@@ -7,9 +7,15 @@ import {
   postponeTask,
   getTasks,
 } from "../controllers/taskController";
-import { verifyToken } from "../middlewares/authMiddleware";
+import {
+  ensureEmailVerified,
+  verifyToken,
+} from "../middlewares/authMiddleware";
 
 const router = Router();
+
+router.use(verifyToken);
+router.use(ensureEmailVerified);
 
 /**
  * Express router for handling task-related operations.
@@ -21,14 +27,14 @@ const router = Router();
  * @param {string} product_id - The ID of the product to which the task belongs.
  * @access Public
  */
-router.post("/:product_id", verifyToken, createTask);
+router.post("/:product_id", createTask);
 
 /**
  * @route GET /tasks
  * @description Retrieves all user tasks by req.
  * @access Public
  */
-router.get("/", verifyToken, getTasks);
+router.get("/", getTasks);
 
 /**
  * @route PUT /tasks/:taskId
@@ -36,7 +42,7 @@ router.get("/", verifyToken, getTasks);
  * @param {string} taskId - The ID of the task to update.
  * @access Public
  */
-router.put("/:taskId", verifyToken, updateTask);
+router.put("/:taskId", updateTask);
 
 /**
  * @route DELETE /tasks/:taskId
@@ -44,11 +50,11 @@ router.put("/:taskId", verifyToken, updateTask);
  * @param {string} taskId - The ID of the task to delete.
  * @access Public
  */
-router.delete("/:taskId", verifyToken, deleteTask);
+router.delete("/:taskId", deleteTask);
 // ✅ Route to mark a task as completed
-router.patch("/:taskId/complete", verifyToken, completeTask);
+router.patch("/:taskId/complete", completeTask);
 
 // ✅ Route to postpone a task
-router.patch("/:taskId/postpone", verifyToken, postponeTask);
+router.patch("/:taskId/postpone", postponeTask);
 
 export default router;

@@ -59,7 +59,7 @@ interface SendEmailWithTemplateProps {
  *   }
  * });
  */
-async function sendEmailWithTemplate({
+export async function sendEmailWithTemplate({
   to,
   template_id,
   dynamicData,
@@ -85,15 +85,28 @@ async function sendEmailWithTemplate({
   }
 }
 
-// Example usage:
-sendEmailWithTemplate({
-  to: process.env.MY_EMAIL!,
-  template_id: "care",
-  dynamicData: {
-    subject: "Time to take care of your products!",
-    userName: "Ariel",
-    productName: "Espresso Machine",
-    careInstructions: "Clean the filter every week.",
-    productImageUrl: "https://example.com/product-image.jpg",
-  },
-});
+/**
+ * Sends an email verification link using SendGrid.
+ *
+ * @param {string} to - Recipient email address.
+ * @param {string} token - Unique verification token.
+ */
+export async function sendVerificationEmail(to: string, token: string) {
+  const verificationUrl = `${process.env.FRONTEND_URL}/auth/verify-email?token=${token}`;
+
+  const msg = {
+    to,
+    from: process.env.SENDGRID_SENDER!,
+    subject: "Verify Your Email",
+    text: `Click the link to verify your email: ${verificationUrl}`,
+    html: `<p>Click <a href="${verificationUrl}">here</a> to verify your email.</p>`,
+  };
+
+  try {
+    await sgMail.send(msg);
+    console.log("✅ Verification email sent to:", to);
+  } catch (error) {
+    console.error("❌ Error sending verification email:", error);
+    throw new Error("Failed to send verification email.");
+  }
+}

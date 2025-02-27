@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { Task } from "../models/Task";
 import { Product } from "../models/Product"; // ✅ יבוא מודל המוצרים
-import { AuthRequest } from "../middlewares/authMiddleware";
+import { AuthRequest } from "../models/AuthRequest";
 
 /**
  * Fetches all maintenance tasks for a user in a calendar format.

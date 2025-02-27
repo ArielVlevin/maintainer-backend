@@ -1,18 +1,29 @@
 import express from "express";
-import { verifyUser, getUserById } from "../controllers/authController";
+import {
+  verifyUser,
+  getUserById,
+  sendVerificationEmailHandler,
+  verifyEmailHandler,
+  updateUser,
+} from "../controllers/authController";
 import { verifyToken } from "../middlewares/authMiddleware";
+import { apiLimiter } from "../middlewares/apiLimiter";
 
 const router = express.Router();
 
-/**
- * @route   POST /api/auth/verify-user
- * @desc    Verifies the authenticated user and updates missing profile fields if necessary.
- * @access  Public (called after OAuth sign-in)
- *
- * This route is triggered after a user logs in with an OAuth provider (Google, Apple, etc.).
- * It checks if the user exists in the database and ensures required fields are set correctly.
- */
+router.use(apiLimiter);
+
 router.post("/verify-user", verifyUser);
+
+router.post("/update-user", verifyToken, updateUser);
+
 router.get("/:userId", verifyToken, getUserById);
+
+router.post(
+  "/send-verification-email",
+  verifyToken,
+  sendVerificationEmailHandler
+);
+router.post("/verify-email", verifyEmailHandler);
 
 export default router;

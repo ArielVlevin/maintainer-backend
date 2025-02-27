@@ -1,5 +1,8 @@
 import express from "express";
-import { verifyToken } from "../middlewares/authMiddleware";
+import {
+  ensureEmailVerified,
+  verifyToken,
+} from "../middlewares/authMiddleware";
 import {
   getProductTasksCalendar,
   getUserTasksCalendar,
@@ -7,7 +10,10 @@ import {
 
 const router = express.Router();
 
-router.get("/user", verifyToken, getUserTasksCalendar);
-router.get("/product/:productId", verifyToken, getProductTasksCalendar);
+router.use(verifyToken);
+router.use(ensureEmailVerified);
+
+router.get("/user", getUserTasksCalendar);
+router.get("/product/:productId", getProductTasksCalendar);
 
 export default router;

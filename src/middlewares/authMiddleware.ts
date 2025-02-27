@@ -1,6 +1,7 @@
-import { Request, Response, NextFunction } from "express";
+import { Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { IUser, User } from "../models/User";
+import { User } from "../models/User";
+import { AuthRequest } from "../models/AuthRequest";
 
 const ACCESS_SECRET = process.env.JWT_SECRET!;
 const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET!;
@@ -18,13 +19,6 @@ export const generateTokens = (userId: string) => {
 };
 
 /**
- * @interface AuthRequest
- * @description Extends Express Request to include authenticated user data.
- */
-export interface AuthRequest extends Request {
-  user?: IUser;
-}
-/**
  * @middleware verifyToken
  * @desc Middleware to authenticate users based on JWT.
  */
@@ -36,10 +30,8 @@ export const verifyToken = async (
   try {
     const authHeader = req.headers.authorization;
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      res.status(401).json({ error: "Unauthorized: No token provided" });
-      return;
-    }
+    if (!authHeader || !authHeader.startsWith("Bearer "))
+      throw new Error("Unauthorized: No token provided");
 
     const token = authHeader.split(" ")[1];
 
@@ -50,23 +42,30 @@ export const verifyToken = async (
       };
 
       const user = await User.findById(decoded._id);
-      if (!user) {
-        res.status(404).json({ error: "User not found" });
-        return;
-      }
+      if (!user) throw new Error("User not found");
+
+      console.log("user: ", user);
       req.user = user;
       next();
     } catch (error) {
-      if (error instanceof jwt.TokenExpiredError) {
-        res.status(401).json({ error: "token_expired" });
-        return;
-      }
-      res.status(403).json({ error: "Invalid or expired token" });
-      return;
+      if (error instanceof jwt.TokenExpiredError)
+        throw new Error("token_expired");
+      throw new Error("Invalid or expired token");
     }
   } catch (error) {
-    console.error("❌ Authentication error:", error);
-    res.status(403).json({ error: "Authentication failed" });
-    return;
+    next(error);
   }
+};
+
+export const ensureEmailVerified = (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  if (!req.user) throw new Error("Unauthorized. Please log in.");
+
+  if (!req.user.emailVerified)
+    throw new Error("Email not verified. Please verify your email.");
+
+  next();
 };

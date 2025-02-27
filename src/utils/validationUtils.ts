@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { AuthRequest } from "../middlewares/authMiddleware";
+import { AuthRequest } from "../models/AuthRequest";
 
 /**
  * Validates user authentication and returns the user ID.

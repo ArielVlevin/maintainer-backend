@@ -6,9 +6,15 @@ import {
   deleteProduct,
   getCategories,
 } from "../controllers/productController";
-import { verifyToken } from "../middlewares/authMiddleware";
+import {
+  ensureEmailVerified,
+  verifyToken,
+} from "../middlewares/authMiddleware";
 
 const router = Router();
+
+router.use(verifyToken);
+router.use(ensureEmailVerified);
 
 /**
  * Express router for handling product-related operations.
@@ -17,21 +23,21 @@ const router = Router();
  * @description Creates a new product.
  * @access Public
  */
-router.post("/", verifyToken, createProduct);
+router.post("/", createProduct);
 
 /**
  * @route GET /products
  * @description Retrieves a list of products with pagination and optional filtering.
  * @access Public
  */
-router.get("/", verifyToken, getProducts);
+router.get("/", getProducts);
 
 /**
  * @route GET /products/categories
  * @description Retrieves a list of unique product categories.
  * @access Public
  */
-router.get("/categories", verifyToken, getCategories);
+router.get("/categories", getCategories);
 
 /**
  * @route PUT /products/:product_id
@@ -39,7 +45,7 @@ router.get("/categories", verifyToken, getCategories);
  * @param product_id - The ID of the product to update.
  * @access Public
  */
-router.put("/:product_id", verifyToken, updateProduct);
+router.put("/:product_id", updateProduct);
 
 /**
  * @route DELETE /products/:product_id
@@ -47,6 +53,6 @@ router.put("/:product_id", verifyToken, updateProduct);
  * @param product_id - The ID of the product to delete.
  * @access Public
  */
-router.delete("/:product_id", verifyToken, deleteProduct);
+router.delete("/:product_id", deleteProduct);
 
 export default router;

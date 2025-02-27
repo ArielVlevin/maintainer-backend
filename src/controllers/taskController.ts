@@ -1,10 +1,10 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Response } from "express";
 import { Task } from "../models/Task";
 import mongoose from "mongoose";
-import { AuthRequest } from "../middlewares/authMiddleware";
+import { AuthRequest } from "../models/AuthRequest";
 import { findProductById, updateProductTasks } from "../utils/productUtils";
 import { findTaskById } from "../utils/taskUtil";
-import { logAction } from "../lib/logAction";
+import { logAction } from "../services/logAction";
 import { addTimeToDate } from "../utils/dateUtils";
 import { validateUserAuth } from "../utils/validationUtils";
 
@@ -93,7 +93,7 @@ export const updateTask = async (
  * @desc    Delete a task and remove its reference from associated products
  */
 export const deleteTask = async (
-  req: Request,
+  req: AuthRequest,
   res: Response,
   next: NextFunction
 ): Promise<void> => {

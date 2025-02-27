@@ -18,7 +18,7 @@ export interface ITask extends Document {
 }
 
 import mongoose, { Schema, Model } from "mongoose";
-import { logAction } from "../lib/logAction";
+import { logAction } from "../services/logAction";
 
 /**
  * Task Schema - Defines the structure of the maintenance task document in MongoDB.

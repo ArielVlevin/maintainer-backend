@@ -1,10 +1,9 @@
 import { NextFunction, Request, Response } from "express";
 import { Product } from "../models/Product";
-import { Task } from "../models/Task";
-import { AuthRequest } from "../middlewares/authMiddleware";
+import { AuthRequest } from "../models/AuthRequest";
 import { User } from "../models/User";
 import mongoose from "mongoose";
-import { logAction } from "../lib/logAction";
+import { logAction } from "../services/logAction";
 import { validateUserAuth } from "../utils/validationUtils";
 
 /**

@@ -1,7 +1,13 @@
 import { NextFunction, Request, Response } from "express";
 import { User } from "../models/User";
-import { AuthRequest } from "../middlewares/authMiddleware";
-import jwt, { JwtPayload, VerifyErrors } from "jsonwebtoken";
+import { AuthRequest } from "../models/AuthRequest";
+import {
+  deleteVerificationToken,
+  getVerificationEmail,
+  setVerificationToken,
+} from "../services/redis";
+import { validateUserAuth } from "../utils/validationUtils";
+import { generateAndSendVerificationEmail } from "../services/authService";
 
 /**
  * @controller verifyUser
@@ -21,29 +27,19 @@ export const verifyUser = async (
   next: NextFunction
 ) => {
   try {
-    const { _id, name, email } = req.body;
+    const { email, name } = req.body;
 
-    if (!_id || !email || !name) throw new Error("Missing required user data");
+    if (!email) throw new Error("Email is required");
 
-    let user = await User.findOne({ _id });
+    let user = await User.findOne({ email });
+
     if (!user) {
-      user = await User.findOne({ email });
-      if (!user) throw new Error("User not found in database.");
+      console.log("🔍 New user detected, creating...");
+      user = new User({ email, name });
+      await user.save();
     }
 
-    const fieldsToUpdate = {
-      name: name || user.name,
-      role: user.role || "user",
-      createdAt: user.createdAt || new Date(),
-      products: user.products || [],
-      emailVerified: user.emailVerified || false,
-      profileCompleted: true,
-    };
-
-    await User.updateOne({ _id: user._id }, { $set: fieldsToUpdate });
-    res
-      .status(200)
-      .json({ message: "User profile completed", user: fieldsToUpdate });
+    res.status(200).json({ user });
   } catch (error) {
     next(error);
   }
@@ -60,17 +56,115 @@ export const verifyUser = async (
  * @param {NextFunction} next - Express next function for error handling.
  * @returns {Response} - JSON response with user data or error message.
  */
+
+/**
+ * Updates user information (name & email) in the database.
+ *
+ * @route   POST /api/auth/update-user
+ * @access  Private (User must be authenticated)
+ */
+export const updateUser = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const user_id = validateUserAuth(req);
+
+    const { name, email } = req.body;
+    if (!user_id || !email || !name) throw new Error("Missing required fields");
+
+    const updatedUser = await User.findByIdAndUpdate(
+      user_id,
+      { name, email, profileCompleted: true },
+      { new: true }
+    );
+
+    if (!updatedUser) throw new Error("User not found");
+
+    res.status(200).json({ success: true, user: updatedUser });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getUserById = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const { _id } = req.user!;
-    const user = await User.findById(_id);
+    const user_id = validateUserAuth(req);
+    const user = await User.findById(user_id);
     if (!user) throw new Error("User not found");
 
     res.status(200).json(user);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @route   POST /auth/send-verification-email
+ * @desc    Sends a verification email to the user
+ * @access  Private (Requires authentication)
+ */
+export const sendVerificationEmailHandler = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const user_id = validateUserAuth(req);
+    const user = await User.findOne({ _id: user_id });
+    if (!user) throw new Error("User not found.");
+
+    if (user.emailVerified) throw new Error("Email is already verified.");
+
+    generateAndSendVerificationEmail(user.email);
+    res
+      .status(200)
+      .json({ success: true, message: "Verification email sent." });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @route   POST /auth/verify-email
+ * @desc    Verifies user's email using a token
+ * @access  Public
+ */
+export const verifyEmailHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { token } = req.body;
+    if (!token) throw new Error("Verification token is required.");
+
+    const email = await getVerificationEmail(token);
+    if (!email) {
+      console.log("⚠️ Token expired or invalid.");
+      res.status(200).json({
+        success: false,
+        message:
+          "Token expired or invalid. Please request a new verification email.",
+      });
+      return;
+    }
+    const user = await User.findOne({ email });
+    if (!user) throw new Error("User not found.");
+
+    user.emailVerified = true;
+    await user.save();
+
+    await deleteVerificationToken(token);
+
+    res
+      .status(200)
+      .json({ success: true, message: "Email verified successfully." });
   } catch (error) {
     next(error);
   }

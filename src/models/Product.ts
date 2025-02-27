@@ -24,7 +24,6 @@ export interface IProduct extends Document {
 
 import mongoose, { Schema, Model } from "mongoose";
 import { ITask, Task } from "./Task";
-import { logAction } from "../lib/logAction";
 import slugify from "slugify";
 /**
  * Product Schema - Defines the structure of the product document in MongoDB.
@@ -34,9 +33,6 @@ import slugify from "slugify";
  * purchase date, tags, and maintenance tracking fields.
  */
 const ProductSchema = new Schema<IProduct>({
-  /**
-   * Product name (Required)
-   */
   name: { type: String, required: true },
   slug: { type: String, unique: true },
   user_id: {
@@ -44,35 +40,11 @@ const ProductSchema = new Schema<IProduct>({
     ref: "User",
     required: true,
   },
-
-  /**
-   * Category of the product (Optional)
-   */
   category: { type: String },
-
-  /**
-   * Manufacturer name (Optional)
-   */
   manufacturer: { type: String },
-
-  /**
-   * Model name (Optional)
-   */
   model: { type: String },
-
-  /**
-   * Date when the product was purchased (Optional)
-   */
   purchaseDate: { type: Date },
-
-  /**
-   * Array of tags associated with the product (Optional)
-   */
   tags: [{ type: String }],
-
-  /**
-   * Array of maintenance task IDs associated with the product
-   */
   tasks: [{ type: mongoose.Schema.Types.ObjectId, ref: "Task" }],
 
   /**

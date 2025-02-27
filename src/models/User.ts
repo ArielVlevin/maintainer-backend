@@ -43,18 +43,14 @@ export interface IUser extends Document {
    */
   products: mongoose.Types.ObjectId[];
 
-  /**
-   * Date when the user was created in the system
-   */
   createdAt: Date;
-
   profileCompleted: boolean;
-
-  emailVerified: boolean | null;
+  emailVerified: boolean;
 }
 
 import mongoose, { Model, Schema } from "mongoose";
-import { logAction } from "../lib/logAction";
+import { logAction } from "../services/logAction";
+import { generateAndSendVerificationEmail } from "../services/authService";
 
 /**
  * User Schema - Defines the structure of the user document in MongoDB.
@@ -64,18 +60,10 @@ import { logAction } from "../lib/logAction";
  */
 const UserSchema = new Schema<IUser>(
   {
-    /**
-     * Full name of the user (Required)
-     */
     name: {
       type: String,
       required: true,
     },
-
-    /**
-     * Email address of the user (Required)
-     * Ensures uniqueness to prevent duplicate accounts.
-     */
     email: {
       type: String,
       required: true,
@@ -98,6 +86,7 @@ const UserSchema = new Schema<IUser>(
     role: {
       type: String,
       enum: ["user", "admin"],
+      default: "user",
     },
 
     /**
@@ -110,16 +99,12 @@ const UserSchema = new Schema<IUser>(
         ref: "Product",
       },
     ],
-
-    /**
-     * Timestamp when the user was created
-     * Automatically set when a new user is registered.
-     */
     createdAt: {
       type: Date,
       default: Date.now,
     },
     profileCompleted: { type: Boolean, default: false },
+    emailVerified: { type: Boolean, default: false },
   },
 
   {
@@ -127,47 +112,30 @@ const UserSchema = new Schema<IUser>(
   }
 );
 
-/**
- * Automatically logs user creation.
- */
-UserSchema.post("save", async function (doc) {
-  await logAction(
-    doc._id as string,
-    "CREATE",
-    "USER",
-    doc._id as string,
-    `User "${doc.name}" registered`
-  );
+UserSchema.post("save", async function (doc, next) {
+  try {
+    if (doc.isModified("email")) {
+      doc.emailVerified = false;
+      generateAndSendVerificationEmail(doc.email);
+    }
+  } catch (error) {
+    console.error("❌ Error sending verification email:", error);
+  }
+  next();
 });
 
-/**
- * Automatically logs user profile updates.
- */
-UserSchema.post("findOneAndUpdate", async function (doc) {
-  if (doc) {
-    await logAction(
-      doc._id,
-      "UPDATE",
-      "USER",
-      doc._id,
-      `User "${doc.name}" updated profile`
-    );
-  }
-});
+UserSchema.pre("findOneAndUpdate", async function (next) {
+  const update = this.getUpdate() as mongoose.UpdateQuery<IUser>; // 💡 Type Assertion
 
-/**
- * Automatically logs user deletion.
- */
-UserSchema.post("findOneAndDelete", async function (doc) {
-  if (doc) {
-    await logAction(
-      doc._id,
-      "DELETE",
-      "USER",
-      doc._id,
-      `User "${doc.name}" deleted their account`
-    );
+  if (update?.email) {
+    update.emailVerified = false;
+
+    // 🔍 מקבל את המשתמש לפני העדכון כדי לבדוק האם האימייל השתנה
+    const user = await this.model.findOne(this.getQuery());
+    if (user && user.email !== update.email)
+      generateAndSendVerificationEmail(update.email);
   }
+  next();
 });
 /**
  * User Model - Exported for use in controllers and database interactions.
