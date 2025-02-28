@@ -1,18 +1,20 @@
 import { NextFunction } from "express";
 import { Product } from "../models/Product";
-import { Types } from "mongoose";
 import { User } from "../models/User";
 import { logAction } from "../services/logAction";
 import { DBError } from "../utils/CustomError";
+import { id, isValidId } from "../types/MongoDB";
+import { updateData, updateEntity } from "../utils/updateData";
 
 /**
  * Finds a product by ID and throws an error if not found.
- * @param {string} productId - The ID of the product.
+ * @param {id} product_id - The ID of the product.
  * @returns {Promise<Product>} - The found product document.
  * @throws {Error} - If the product does not exist.
  */
-export const findProductById = async (productId: string) => {
-  const product = await Product.findById(productId);
+export const findProductById = async (product_id: string | id) => {
+  if (!isValidId(product_id)) throw new DBError("Invalid Product ID");
+  const product = await Product.findById(product_id);
   if (!product) throw new Error("Product not found");
   return product;
 };
@@ -45,10 +47,7 @@ export const updateProductTasks = async (
  * @param productData - The product data.
  * @returns The created product.
  */
-export const createProduct = async (
-  user_id: string | Types.ObjectId,
-  productData: any
-) => {
+export const createProduct = async (user_id: id, productData: any) => {
   const { name, category, manufacturer, model, tags, purchaseDate, iconUrl } =
     productData;
 
@@ -76,7 +75,7 @@ export const createProduct = async (
     user_id,
     "CREATE",
     "PRODUCT",
-    newProduct._id.toString(),
+    newProduct._id,
     `Product "${newProduct.name}" was created`
   );
 
@@ -89,15 +88,12 @@ export const createProduct = async (
  * @param updatedData - The new product data.
  * @returns The updated product.
  */
-export const updateProduct = async (product_id: string, updatedData: any) => {
-  const product = await Product.findById(product_id);
-  if (!product) throw new DBError("Product not found");
-
-  Object.assign(product, updatedData);
-  await product.save();
-  return product;
+export const updateProduct = async (
+  product_id: id | string,
+  updatedData: any
+) => {
+  return updateEntity(findProductById, product_id, updatedData);
 };
-
 /**
  * Fetches products with filtering, pagination, and field selection.
  * @param queryParams - Query parameters for filtering and pagination.
@@ -123,8 +119,7 @@ export const getProducts = async (queryParams: any) => {
   if (productId || slug) {
     let product;
     if (productId) {
-      if (!Types.ObjectId.isValid(productId))
-        throw new DBError("Invalid Product ID");
+      if (!isValidId(productId)) throw new DBError("Invalid Product ID");
 
       product = await Product.findById(productId)
         .populate("lastOverallMaintenance")
@@ -181,24 +176,16 @@ export const getProducts = async (queryParams: any) => {
  * @param product_id - The ID of the product to delete.
  * @returns Deletion success message.
  */
-export const deleteProduct = async (
-  product_id: string,
-  user_id: string | Types.ObjectId
-) => {
-  const product = await Product.findById(product_id);
-  if (!product) throw new DBError("Product not found");
-
-  // מוחק את המוצר מהדאטהבייס
+export const deleteProduct = async (product_id: id | string, user_id: id) => {
+  const product = await findProductById(product_id);
   await product.deleteOne();
-
-  // מעדכן את המשתמש ומסיר את ה-product_id מהמוצרים שלו
   await User.findByIdAndUpdate(user_id, { $pull: { products: product_id } });
 
   await logAction(
     user_id,
     "DELETE",
     "PRODUCT",
-    product_id,
+    product_id as id,
     `Product "${product.name}" was deleted`
   );
 

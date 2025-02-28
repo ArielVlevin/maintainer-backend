@@ -1,13 +1,14 @@
 import { NextFunction, Request, Response } from "express";
-import { AuthRequest } from "../models/AuthRequest";
+import { AuthRequest } from "../types/AuthRequest";
 import { validateUserAuth } from "../utils/validationUtils";
 import {
   createUserIfNotExists,
   updateUserById,
   findUserById,
-  sendVerificationEmail,
+  sendVerification,
   verifyEmailToken,
-} from "../services/userService";
+} from "../services/authService";
+import { sendSuccessResponse } from "../services/apiResponse";
 
 export const verifyUserHandler = async (
   req: Request,
@@ -17,7 +18,7 @@ export const verifyUserHandler = async (
   try {
     const { email, name } = req.body;
     const user = await createUserIfNotExists(email, name);
-    res.status(200).json({ user });
+    sendSuccessResponse(res, user, "User verified successfully");
   } catch (error) {
     next(error);
   }
@@ -33,7 +34,7 @@ export const updateUserHandler = async (
     const { name, email } = req.body;
     const updatedUser = await updateUserById(user_id, name, email);
 
-    res.status(200).json({ success: true, user: updatedUser });
+    sendSuccessResponse(res, updatedUser, "User updated successfully");
   } catch (error) {
     next(error);
   }
@@ -48,7 +49,7 @@ export const getUserByIdHandler = async (
     const user_id = validateUserAuth(req);
     const user = await findUserById(user_id);
 
-    res.status(200).json(user);
+    sendSuccessResponse(res, user, "User retrieved successfully");
   } catch (error) {
     next(error);
   }
@@ -61,10 +62,8 @@ export const sendVerificationEmailHandler = async (
 ) => {
   try {
     const user_id = validateUserAuth(req);
-    await sendVerificationEmail(user_id);
-    res
-      .status(200)
-      .json({ success: true, message: "Verification email sent." });
+    await sendVerification(user_id);
+    sendSuccessResponse(res, null, "Verification email sent.");
   } catch (error) {
     next(error);
   }
@@ -78,7 +77,7 @@ export const verifyEmailHandler = async (
   try {
     const { token } = req.body;
     const result = await verifyEmailToken(token);
-    res.status(200).json(result);
+    sendSuccessResponse(res, result, "Email verification processed.");
   } catch (error) {
     next(error);
   }

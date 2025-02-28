@@ -3,10 +3,10 @@
  * @description Represents a product that requires maintenance.
  */
 export interface IProduct extends Document {
-  _id?: mongoose.Types.ObjectId | string; // Unique identifier
+  _id: id;
   name: string; // Product name
   slug: string;
-  user_id: mongoose.Types.ObjectId | string;
+  user_id: id;
 
   category?: string; // Optional: Product category
   manufacturer?: string; // Optional: Manufacturer name
@@ -14,17 +14,20 @@ export interface IProduct extends Document {
   tags?: string[]; // Optional: Product tags for categorization
   purchaseDate?: Date; // Optional: Purchase date of the product
 
-  tasks: mongoose.Types.ObjectId[]; // Array of maintenance task IDs associated with the product
+  tasks: id[]; // Array of maintenance task IDs associated with the product
 
-  lastOverallMaintenance?: mongoose.Types.ObjectId | ITask; // Reference to the last completed maintenance task
-  nextOverallMaintenance?: mongoose.Types.ObjectId | ITask; // Reference to the next upcoming maintenance task
+  lastOverallMaintenance?: id | ITask; // Reference to the last completed maintenance task
+  nextOverallMaintenance?: id | ITask; // Reference to the next upcoming maintenance task
 
   iconUrl?: string; // URL for the product's icon or image
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 import mongoose, { Schema, Model } from "mongoose";
 import { ITask, Task } from "./Task";
 import slugify from "slugify";
+import { id } from "../types/MongoDB";
 /**
  * Product Schema - Defines the structure of the product document in MongoDB.
  *
@@ -46,20 +49,8 @@ const ProductSchema = new Schema<IProduct>({
   purchaseDate: { type: Date },
   tags: [{ type: String }],
   tasks: [{ type: mongoose.Schema.Types.ObjectId, ref: "Task" }],
-
-  /**
-   * The most recent maintenance task performed on this product
-   */
   lastOverallMaintenance: { type: mongoose.Schema.Types.ObjectId, ref: "Task" },
-
-  /**
-   * The next scheduled maintenance task for this product
-   */
   nextOverallMaintenance: { type: mongoose.Schema.Types.ObjectId, ref: "Task" },
-
-  /**
-   * URL of the product's icon image
-   */
   iconUrl: { type: String, default: "/uploads/default-product.png" },
 });
 
@@ -117,20 +108,13 @@ ProductSchema.pre("save", async function (next) {
 
 ProductSchema.pre("findOneAndDelete", async function (next) {
   const product = await this.model.findOne(this.getQuery());
-
-  if (product) {
-    await Task.deleteMany({ product_id: product._id });
-    console.log(
-      `✅ All tasks linked to product ${product._id} have been deleted.`
-    );
-  }
-
+  if (product) await Task.deleteMany({ product_id: product._id });
   next();
 });
 
-/**
- * Product Model - Exported for use in controllers and database interactions
- */
+ProductSchema.index({ category: 1 });
+ProductSchema.index({ user_id: 1 });
+
 export const Product: Model<IProduct> = mongoose.model<IProduct>(
   "Product",
   ProductSchema

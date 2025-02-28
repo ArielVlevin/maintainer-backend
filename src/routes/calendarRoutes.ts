@@ -7,13 +7,16 @@ import {
   getProductTasksCalendar,
   getUserTasksCalendar,
 } from "../controllers/calendarController";
+import { requestLogger } from "../middlewares/requestLogger";
 
 const router = express.Router();
 
 router.use(verifyToken);
 router.use(ensureEmailVerified);
 
+router.use(requestLogger);
+
 router.get("/user", getUserTasksCalendar);
-router.get("/product/:productId", getProductTasksCalendar);
+router.get("/product/:product_id", getProductTasksCalendar);
 
 export default router;

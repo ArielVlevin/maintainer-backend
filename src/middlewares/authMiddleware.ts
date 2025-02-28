@@ -1,7 +1,8 @@
 import { Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { User } from "../models/User";
-import { AuthRequest } from "../models/AuthRequest";
+import { AuthRequest } from "../types/AuthRequest";
+import { id } from "../types/MongoDB";
 
 const ACCESS_SECRET = process.env.JWT_SECRET!;
 const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET!;
@@ -37,7 +38,7 @@ export const verifyToken = async (
 
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
-        _id: string;
+        _id: id;
         email: string;
       };
 

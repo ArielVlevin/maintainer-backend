@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { AuthRequest } from "../models/AuthRequest";
+import { AuthRequest } from "../types/AuthRequest";
 import { validateUserAuth } from "../utils/validationUtils";
 import {
   createProduct,
@@ -8,6 +8,7 @@ import {
   getProducts,
   updateProduct,
 } from "../services/productService";
+import { sendSuccessResponse } from "../services/apiResponse";
 
 /**
  * @route   POST /products
@@ -22,7 +23,7 @@ export const createProductHandler = async (
   try {
     const user_id = validateUserAuth(req);
     const product = await createProduct(user_id, req.body);
-    res.status(201).json(product);
+    sendSuccessResponse(res, product, "Product created successfully", 201);
   } catch (error) {
     next(error);
   }
@@ -41,7 +42,7 @@ export const updateProductHandler = async (
   try {
     const { product_id } = req.params;
     const updatedProduct = await updateProduct(product_id, req.body);
-    res.json(updatedProduct);
+    sendSuccessResponse(res, updatedProduct, "Product updated successfully");
   } catch (error) {
     next(error);
   }
@@ -60,7 +61,7 @@ export const getProductsHandler = async (
   try {
     const user_id = req.user?._id?.toString();
     const products = await getProducts({ ...req.query, user_id });
-    res.status(200).json(products);
+    sendSuccessResponse(res, products, "Products fetched successfully");
   } catch (error) {
     next(error);
   }
@@ -80,7 +81,7 @@ export const deleteProductHandler = async (
     const user_id = validateUserAuth(req);
     const { product_id } = req.params;
     const result = await deleteProduct(product_id, user_id);
-    res.json(result);
+    sendSuccessResponse(res, result, "Product deleted successfully");
   } catch (error) {
     next(error);
   }
@@ -98,7 +99,7 @@ export const getCategoriesHandler = async (
 ) => {
   try {
     const categories = await getCategories();
-    res.json(categories);
+    sendSuccessResponse(res, categories, "Categories fetched successfully");
   } catch (error) {
     next(error);
   }

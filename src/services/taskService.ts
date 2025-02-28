@@ -1,26 +1,28 @@
 import { NextFunction } from "express";
-import mongoose, { Types } from "mongoose";
 import { Task } from "../models/Task";
-
-import { logAction } from "./logAction";
 import { addTimeToDate } from "../utils/dateUtils";
 import { findProductById } from "./productService";
 import { DBError } from "../utils/CustomError";
+import { id, isValidId } from "../types/MongoDB";
+import { updateData, updateEntity } from "../utils/updateData";
 
-/**
- * Helper function to find a task by ID and validate ownership.
- */
-export const findTaskById = async (
-  taskId: string | Types.ObjectId,
-  userId: string | mongoose.Types.ObjectId,
+export const findTaskById = async (task_id: string | id) => {
+  if (!isValidId(task_id)) throw new DBError("Invalid Task ID");
+
+  const task = await Task.findById(task_id);
+  if (!task) throw new DBError("Task not found");
+
+  return task;
+};
+
+export const findTask = async (
+  task_id: id,
+  user_id: id,
   next: NextFunction
 ) => {
   try {
-    if (!mongoose.isValidObjectId(taskId)) throw new Error("Invalid Task ID");
-    const task = await Task.findById(taskId);
-    if (!task) throw new Error("Task not found");
-    if (task.user_id.toString() !== userId.toString())
-      throw new Error("Unauthorized");
+    const task = await findTaskById(task_id);
+    if (task.user_id !== user_id) throw new Error("Unauthorized");
     return task;
   } catch (error) {
     next(error);
@@ -35,8 +37,8 @@ export const findTaskById = async (
  * @returns The newly created task.
  */
 export const createTask = async (
-  user_id: string | Types.ObjectId,
-  product_id: string,
+  user_id: id,
+  product_id: id | string,
   taskData: any
 ) => {
   const product = await findProductById(product_id);
@@ -70,14 +72,8 @@ export const createTask = async (
  * @param updatedData - The updated task data.
  * @returns The updated task.
  */
-export const updateTask = async (task_id: string, updatedData: any) => {
-  const updatedTask = await Task.findByIdAndUpdate(task_id, updatedData, {
-    new: true,
-  });
-
-  if (!updatedTask) throw new DBError("Task not found");
-
-  return updatedTask;
+export const updateTask = async (task_id: id | string, updatedData: any) => {
+  return updateEntity(findTaskById, task_id, updatedData);
 };
 
 /**
@@ -85,7 +81,9 @@ export const updateTask = async (task_id: string, updatedData: any) => {
  * @param taskId - The ID of the task to delete.
  * @returns A success message.
  */
-export const deleteTask = async (task_id: string) => {
+export const deleteTask = async (task_id: string | id) => {
+  if (!isValidId(task_id)) throw new DBError("Invalid Task ID");
+
   const task = await Task.findById(task_id);
   if (!task) throw new DBError("Task not found");
 
@@ -106,17 +104,14 @@ export const deleteTask = async (task_id: string) => {
  * @param filters - The query filters.
  * @returns The list of tasks matching the filters.
  */
-export const getTasks = async (
-  user_id: string | Types.ObjectId,
-  filters: any
-) => {
+export const getTasks = async (user_id: id, filters: any) => {
   const { taskId, productId, page = 1, limit = 10, status, search } = filters;
 
   const skip = (parseInt(page as string) - 1) * parseInt(limit as string);
 
   // Fetch a single task if taskId is provided
   if (taskId) {
-    if (!mongoose.isValidObjectId(taskId)) throw new DBError("Invalid Task ID");
+    if (!isValidId(taskId)) throw new DBError("Invalid Task ID");
 
     const task = await Task.findOne({
       _id: taskId,
@@ -162,8 +157,10 @@ export const getTasks = async (
  * @param taskId - The ID of the task to complete.
  * @returns The updated task.
  */
-export const completeTask = async (taskId: string) => {
-  const task = await Task.findById(taskId);
+export const completeTask = async (task_id: string | id) => {
+  if (!isValidId(task_id)) throw new DBError("Invalid Task ID");
+
+  const task = await Task.findById(task_id);
   if (!task) throw new DBError("Task not found");
 
   task.status = "completed";
@@ -180,8 +177,10 @@ export const completeTask = async (taskId: string) => {
  * @param days - The number of days to postpone.
  * @returns The updated task.
  */
-export const postponeTask = async (taskId: string, days: number) => {
-  const task = await Task.findById(taskId);
+export const postponeTask = async (task_id: id | string, days: number) => {
+  if (!isValidId(task_id)) throw new DBError("Invalid Task ID");
+
+  const task = await Task.findById(task_id);
   if (!task) throw new DBError("Task not found");
 
   task.nextMaintenance = addTimeToDate(task.nextMaintenance, days);

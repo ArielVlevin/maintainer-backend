@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { AuthRequest } from "../models/AuthRequest";
+import { AuthRequest } from "../types/AuthRequest";
 
 /**
  * Validates user authentication and returns the user ID.

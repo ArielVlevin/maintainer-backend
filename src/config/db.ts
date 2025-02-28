@@ -8,16 +8,16 @@ export const connectDB = async () => {
   const isTestEnv = process.env.NODE_ENV === "test";
 
   try {
+    let mongoUri;
     if (isTestEnv) {
       logger.info("🧪 Running in TEST mode - Using in-memory MongoDB");
       mongoServer = await MongoMemoryServer.create();
-      const mongoUri = mongoServer.getUri();
-      await mongoose.connect(mongoUri);
-    } else {
-      const mongoUri =
+      mongoUri = mongoServer.getUri();
+    } else
+      mongoUri =
         process.env.MONGO_URI || "mongodb://localhost:27017/maintainer";
-      await mongoose.connect(mongoUri);
-    }
+
+    await mongoose.connect(mongoUri);
 
     logger.info("✅ MongoDB Connected");
   } catch (error) {

@@ -1,5 +1,5 @@
 import { NextFunction, Response } from "express";
-import { AuthRequest } from "../models/AuthRequest";
+import { AuthRequest } from "../types/AuthRequest";
 import {
   createTask,
   updateTask,
@@ -9,6 +9,7 @@ import {
   postponeTask,
 } from "../services/taskService";
 import { validateUserAuth } from "../utils/validationUtils";
+import { sendSuccessResponse } from "../services/apiResponse";
 
 /**
  * @route   POST /tasks/:product_id
@@ -25,11 +26,7 @@ export const createTaskHandler = async (
     const taskData = req.body;
 
     const result = await createTask(user_id, product_id, taskData);
-    res.status(201).json({
-      message: "Task added successfully",
-      product: result.product,
-      task: result.task,
-    });
+    sendSuccessResponse(res, result, "Task added successfully", 201);
   } catch (error) {
     next(error);
   }
@@ -45,9 +42,9 @@ export const updateTaskHandler = async (
   next: NextFunction
 ) => {
   try {
-    const { taskId } = req.params;
-    const updatedTask = await updateTask(taskId, req.body);
-    res.json(updatedTask);
+    const { task_id } = req.params;
+    const updatedTask = await updateTask(task_id, req.body);
+    sendSuccessResponse(res, updatedTask, "Task updated successfully");
   } catch (error) {
     next(error);
   }
@@ -63,9 +60,9 @@ export const deleteTaskHandler = async (
   next: NextFunction
 ) => {
   try {
-    const { taskId } = req.params;
-    const result = await deleteTask(taskId);
-    res.json(result);
+    const { task_id } = req.params;
+    const result = await deleteTask(task_id);
+    sendSuccessResponse(res, result, "Task deleted successfully");
   } catch (error) {
     next(error);
   }
@@ -83,7 +80,7 @@ export const getTasksHandler = async (
   try {
     const user_id = validateUserAuth(req);
     const tasks = await getTasks(user_id, req.query);
-    res.status(200).json(tasks);
+    sendSuccessResponse(res, tasks, "Tasks retrieved successfully");
   } catch (error) {
     next(error);
   }
@@ -99,9 +96,9 @@ export const completeTaskHandler = async (
   next: NextFunction
 ) => {
   try {
-    const { taskId } = req.params;
-    const task = await completeTask(taskId);
-    res.json({ success: true, message: "Task completed successfully", task });
+    const { task_id } = req.params;
+    const task = await completeTask(task_id);
+    sendSuccessResponse(res, task, "Task completed successfully");
   } catch (error) {
     next(error);
   }
@@ -117,14 +114,10 @@ export const postponeTaskHandler = async (
   next: NextFunction
 ) => {
   try {
-    const { taskId } = req.params;
+    const { task_id } = req.params;
     const { days } = req.body;
-    const task = await postponeTask(taskId, days);
-    res.json({
-      success: true,
-      message: `Task postponed by ${days} days`,
-      task,
-    });
+    const task = await postponeTask(task_id, days);
+    sendSuccessResponse(res, task, `Task postponed by ${days} days`);
   } catch (error) {
     next(error);
   }

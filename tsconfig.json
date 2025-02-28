@@ -1,14 +1,16 @@
 {
   "compilerOptions": {
+    "types": ["jest", "node"],
     "target": "ES6",
     "module": "CommonJS",
     "outDir": "./dist",
     "rootDir": "./src",
-    "types": ["node", "jest"],
-    "baseUrl": "./",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true
   },
   "include": ["src"],

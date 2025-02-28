@@ -13,11 +13,13 @@
   "description": "",
   "dependencies": {
     "@sendgrid/mail": "^8.1.4",
+    "compression": "^1.8.0",
     "cors": "^2.8.5",
     "date-fns": "^4.1.0",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.9.6",
     "multer": "^1.4.5-lts.1",
@@ -29,6 +31,7 @@
   },
   "devDependencies": {
     "@babel/preset-env": "^7.26.9",
+    "@types/compression": "^1.7.5",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/jest": "^29.5.14",

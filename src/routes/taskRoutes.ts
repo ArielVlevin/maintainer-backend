@@ -11,11 +11,14 @@ import {
   ensureEmailVerified,
   verifyToken,
 } from "../middlewares/authMiddleware";
+import { requestLogger } from "../middlewares/requestLogger";
 
 const router = Router();
 
 router.use(verifyToken);
 router.use(ensureEmailVerified);
+
+router.use(requestLogger);
 
 /**
  * Express router for handling task-related operations.
@@ -23,10 +26,10 @@ router.use(ensureEmailVerified);
 
 router.post("/:product_id", createTaskHandler);
 router.get("/", getTasksHandler);
-router.put("/:taskId", updateTaskHandler);
-router.delete("/:taskId", deleteTaskHandler);
+router.put("/:task_id", updateTaskHandler);
+router.delete("/:task_id", deleteTaskHandler);
 
-router.patch("/:taskId/complete", completeTaskHandler);
-router.patch("/:taskId/postpone", postponeTaskHandler);
+router.patch("/:task_id/complete", completeTaskHandler);
+router.patch("/:task_id/postpone", postponeTaskHandler);
 
 export default router;

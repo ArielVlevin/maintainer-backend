@@ -1,5 +1,5 @@
-import mongoose from "mongoose";
 import { Log } from "../models/Log";
+import { id } from "../types/MongoDB";
 
 /**
  * Logs an action performed by a user.
@@ -11,10 +11,10 @@ import { Log } from "../models/Log";
  * @param {string} details - A description of the action performed.
  */
 export const logAction = async (
-  userId: string | mongoose.Types.ObjectId,
+  userId: id,
   actionType: string,
   entityType: string,
-  entityId: string | mongoose.Types.ObjectId,
+  entityId: id,
   details: string
 ) => {
   try {

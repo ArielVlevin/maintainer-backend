@@ -1,0 +1,16 @@
+{"level":"error","message":"❌ MongoDB Connection Error: Can't call `openUri()` on an active connection with different connection strings. Make sure you aren't calling `mongoose.connect()` multiple times. See: https://mongoosejs.com/docs/connections.html#multiple_connections","stack":"MongooseError: Can't call `openUri()` on an active connection with different connection strings. Make sure you aren't calling `mongoose.connect()` multiple times. See: https://mongoosejs.com/docs/connections.html#multiple_connections\n    at NativeConnection.createClient (/Users/ariellevin/projects/Maintainer/backend/node_modules/mongoose/lib/drivers/node-mongodb-native/connection.js:239:13)\n    at NativeConnection.openUri (/Users/ariellevin/projects/Maintainer/backend/node_modules/mongoose/lib/connection.js:1016:34)\n    at Mongoose.connect (/Users/ariellevin/projects/Maintainer/backend/node_modules/mongoose/lib/mongoose.js:446:15)\n    at /Users/ariellevin/projects/Maintainer/backend/src/config/db.ts:27:38\n    at Generator.next (<anonymous>)\n    at fulfilled (/Users/ariellevin/projects/Maintainer/backend/src/config/db.ts:5:58)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)","timestamp":"2025-02-28T11:31:04.056Z"}
+{"level":"error","message":"❌ Error: Invalid Task ID","timestamp":"2025-02-28T13:24:04.175Z"}
+{"level":"error","message":"❌ Error: Invalid Task ID","timestamp":"2025-02-28T13:24:50.266Z"}
+{"level":"error","message":"❌ Error: Invalid Task ID","timestamp":"2025-02-28T13:25:40.852Z"}
+{"level":"error","message":"❌ Error: Invalid Task ID","timestamp":"2025-02-28T13:26:30.490Z"}
+{"level":"error","message":"❌ Error: Invalid Task ID","timestamp":"2025-02-28T13:28:18.064Z"}
+{"level":"error","message":"❌ Error: Invalid Task ID","timestamp":"2025-02-28T13:39:21.744Z"}
+{"level":"error","message":"❌ Error: Invalid Task ID","timestamp":"2025-02-28T13:42:21.030Z"}
+{"level":"error","message":"❌ Error: Invalid Task ID","timestamp":"2025-02-28T14:06:06.689Z"}
+{"level":"error","message":"❌ Error: Invalid Task ID","timestamp":"2025-02-28T14:11:16.853Z"}
+{"level":"error","message":"❌ Error: Invalid Task ID","timestamp":"2025-02-28T14:13:07.664Z"}
+{"level":"error","message":"❌ Error: Invalid Task ID","timestamp":"2025-02-28T14:14:32.543Z"}
+{"level":"error","message":"❌ Error: Invalid Task ID","timestamp":"2025-02-28T14:16:02.005Z"}
+{"level":"error","message":"❌ Error: Invalid Task ID","timestamp":"2025-02-28T14:16:34.764Z"}
+{"level":"error","message":"❌ Error: Invalid Task ID","timestamp":"2025-02-28T14:40:39.806Z"}
+{"level":"error","message":"❌ Error: Invalid Task ID","timestamp":"2025-02-28T14:41:06.626Z"}

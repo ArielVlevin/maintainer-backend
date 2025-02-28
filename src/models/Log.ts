@@ -1,10 +1,11 @@
 import mongoose, { Schema, Document } from "mongoose";
+import { id } from "../types/MongoDB";
 
 export interface ILog extends Document {
-  user_id: mongoose.Types.ObjectId;
+  user_id: id;
   actionType: "CREATE" | "UPDATE" | "DELETE" | "COMPLETE";
   entityType: "PRODUCT" | "TASK" | "USER";
-  entityId: mongoose.Types.ObjectId;
+  entityId: id;
   details: string;
   timestamp: Date;
 }

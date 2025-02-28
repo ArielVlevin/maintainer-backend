@@ -11,53 +11,22 @@
  */
 
 export interface IUser extends Document {
-  _id?: mongoose.Types.ObjectId | string; // Unique identifier
-
-  /**
-   * Unique Google ID of the user (Required)
-   */
-  /**
-   * Full name of the user (Required)
-   */
+  _id: id;
   name: string;
-
-  /**
-   * Email address of the user (Required)
-   */
   email: string;
-
-  /**
-   * Profile picture URL of the user (Optional)
-   */
   image: string;
-
-  /**
-   * Role of the user - Determines user permissions
-   * Can be either "user" (default) or "admin"
-   */
   role: "user" | "admin";
-
-  /**
-   * Array of product IDs owned by the user
-   * References the "Product" model
-   */
-  products: mongoose.Types.ObjectId[];
-
-  createdAt: Date;
+  products: id[];
   profileCompleted: boolean;
   emailVerified: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 import mongoose, { Model, Schema } from "mongoose";
-import { logAction } from "../services/logAction";
 import { generateAndSendVerificationEmail } from "../services/authService";
+import { id } from "../types/MongoDB";
 
-/**
- * User Schema - Defines the structure of the user document in MongoDB.
- *
- * The schema includes user identification details such as Google ID, name, email, and profile picture.
- * Additionally, it tracks user roles and associated products.
- */
 const UserSchema = new Schema<IUser>(
   {
     name: {
@@ -69,40 +38,21 @@ const UserSchema = new Schema<IUser>(
       required: true,
       unique: true,
     },
-
-    /**
-     * Profile picture URL (Optional)
-     * Defaults to an empty string if no picture is provided.
-     */
     image: {
       type: String,
       default: "",
     },
-
-    /**
-     * User role - Defines permissions in the system
-     * Can be either "user" or "admin" (default: "user")
-     */
     role: {
       type: String,
       enum: ["user", "admin"],
       default: "user",
     },
-
-    /**
-     * List of product IDs owned by the user
-     * References the "Product" model in MongoDB
-     */
     products: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Product",
       },
     ],
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
     profileCompleted: { type: Boolean, default: false },
     emailVerified: { type: Boolean, default: false },
   },
