@@ -1,12 +1,8 @@
 import { Request, Response, NextFunction } from "express";
+import logger from "../utils/logger";
 
 /**
- * Middleware for handling errors globally in the API.
- *
- * @param {Error} err - The error object thrown in the API.
- * @param {Request} req - The request object.
- * @param {Response} res - The response object.
- * @param {NextFunction} next - The Express next function.
+ * Middleware to handle errors in a consistent format.
  */
 export const errorHandler = (
   err: Error,
@@ -14,13 +10,10 @@ export const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  console.error("❌ Error:", err.message);
+  logger.error(`❌ Error: ${err.message}`);
 
-  // If status is not set, default to 500
-  const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
-
-  res.status(statusCode).json({
+  res.status(500).json({
     success: false,
-    error: err.message || "Internal Server Error",
+    message: err.message || "Internal Server Error",
   });
 };

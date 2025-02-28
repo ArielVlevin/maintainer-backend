@@ -1,0 +1,153 @@
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-27T19:23:39.471Z"}
+{"level":"info","message":"🔌 MongoDB Disconnected","timestamp":"2025-02-27T19:26:29.531Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T05:35:48.860Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T06:20:57.705Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T06:21:05.534Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T06:24:52.485Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T06:25:37.656Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T06:26:37.307Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T06:27:11.132Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T06:27:59.500Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T06:28:06.997Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T06:31:01.156Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T06:31:35.512Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T06:32:00.412Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T06:34:40.343Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T06:34:45.639Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T06:35:03.426Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T06:39:38.645Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T06:39:49.824Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T06:41:11.188Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T06:42:23.820Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T06:42:32.539Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T06:43:12.032Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T06:43:37.647Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T06:43:45.919Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T06:43:56.016Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T06:46:19.472Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T06:46:57.632Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T06:47:21.839Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T06:48:01.715Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T06:50:57.340Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T06:51:46.914Z"}
+{"level":"info","message":"✅ Redis connected successfully","timestamp":"2025-02-28T06:52:42.211Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T06:52:43.538Z"}
+{"level":"info","message":"⏳ Task reset job scheduled to run every round hour.","timestamp":"2025-02-28T06:53:08.234Z"}
+{"level":"info","message":"✅ Redis connected successfully","timestamp":"2025-02-28T06:53:08.242Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T06:53:09.715Z"}
+{"level":"info","message":"⏳ Task reset job scheduled to run every round hour.","timestamp":"2025-02-28T06:53:29.916Z"}
+{"level":"info","message":"✅ Redis connected successfully","timestamp":"2025-02-28T06:53:29.934Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T06:53:31.289Z"}
+{"level":"info","message":"⏳ Task reset job scheduled to run every round hour.","timestamp":"2025-02-28T06:55:01.988Z"}
+{"level":"info","message":"✅ Redis connected successfully","timestamp":"2025-02-28T06:55:01.997Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T06:55:03.926Z"}
+{"level":"info","message":"⏳ Task reset job scheduled to run every round hour.","timestamp":"2025-02-28T06:55:53.092Z"}
+{"level":"info","message":"✅ Redis connected successfully","timestamp":"2025-02-28T06:55:53.099Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T06:55:54.343Z"}
+{"level":"info","message":"⏳ Task reset job scheduled to run every round hour.","timestamp":"2025-02-28T06:56:04.544Z"}
+{"level":"info","message":"✅ Redis connected successfully","timestamp":"2025-02-28T06:56:04.554Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T06:56:05.953Z"}
+{"level":"info","message":"⏳ Task reset job scheduled to run every round hour.","timestamp":"2025-02-28T06:57:17.939Z"}
+{"level":"info","message":"✅ Redis connected successfully","timestamp":"2025-02-28T06:57:17.947Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T06:57:19.387Z"}
+{"level":"info","message":"⏳ Task reset job scheduled to run every round hour.","timestamp":"2025-02-28T06:57:42.610Z"}
+{"level":"info","message":"✅ Redis connected successfully","timestamp":"2025-02-28T06:57:42.620Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T06:57:43.811Z"}
+{"level":"info","message":"⏳ Task reset job scheduled to run every round hour.","timestamp":"2025-02-28T06:57:51.649Z"}
+{"level":"info","message":"✅ Redis connected successfully","timestamp":"2025-02-28T06:57:51.658Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T06:57:52.888Z"}
+{"level":"info","message":"⏳ Task reset job scheduled to run every round hour.","timestamp":"2025-02-28T06:58:20.372Z"}
+{"level":"info","message":"🚀 Server running on port 5001","timestamp":"2025-02-28T06:58:20.377Z"}
+{"level":"info","message":"✅ Redis connected successfully","timestamp":"2025-02-28T06:58:20.380Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T06:58:22.004Z"}
+{"level":"info","message":"⏳ Running scheduled task reset job...","timestamp":"2025-02-28T07:00:00.504Z"}
+{"level":"info","message":"⏳ Task reset job scheduled to run every round hour.","timestamp":"2025-02-28T07:26:13.629Z"}
+{"level":"info","message":"🚀 Server running on port 5001","timestamp":"2025-02-28T07:26:13.634Z"}
+{"level":"info","message":"✅ Redis connected successfully","timestamp":"2025-02-28T07:26:13.637Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T07:26:15.043Z"}
+{"level":"info","message":"⏳ Task reset job scheduled to run every round hour.","timestamp":"2025-02-28T07:26:26.443Z"}
+{"level":"info","message":"🚀 Server running on port 5001","timestamp":"2025-02-28T07:26:26.447Z"}
+{"level":"info","message":"✅ Redis connected successfully","timestamp":"2025-02-28T07:26:26.451Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T07:26:27.669Z"}
+{"level":"info","message":"⏳ Task reset job scheduled to run every round hour.","timestamp":"2025-02-28T07:26:55.348Z"}
+{"level":"info","message":"🚀 Server running on port 5001","timestamp":"2025-02-28T07:26:55.352Z"}
+{"level":"info","message":"✅ Redis connected successfully","timestamp":"2025-02-28T07:26:55.355Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T07:26:56.511Z"}
+{"level":"info","message":"⏳ Task reset job scheduled to run every round hour.","timestamp":"2025-02-28T07:37:55.033Z"}
+{"level":"info","message":"🚀 Server running on port 5001","timestamp":"2025-02-28T07:37:55.038Z"}
+{"level":"info","message":"✅ Redis connected successfully","timestamp":"2025-02-28T07:37:55.041Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T07:37:56.891Z"}
+{"level":"info","message":"⏳ Task reset job scheduled to run every round hour.","timestamp":"2025-02-28T07:40:24.427Z"}
+{"level":"info","message":"🚀 Server running on port 5001","timestamp":"2025-02-28T07:40:24.431Z"}
+{"level":"info","message":"✅ Redis connected successfully","timestamp":"2025-02-28T07:40:24.434Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T07:40:26.389Z"}
+{"level":"info","message":"⏳ Task reset job scheduled to run every round hour.","timestamp":"2025-02-28T07:41:16.940Z"}
+{"level":"info","message":"🚀 Server running on port 5001","timestamp":"2025-02-28T07:41:16.943Z"}
+{"level":"info","message":"✅ Redis connected successfully","timestamp":"2025-02-28T07:41:16.948Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T07:41:18.265Z"}
+{"level":"info","message":"⏳ Task reset job scheduled to run every round hour.","timestamp":"2025-02-28T07:42:47.856Z"}
+{"level":"info","message":"🚀 Server running on port 5001","timestamp":"2025-02-28T07:42:47.860Z"}
+{"level":"info","message":"✅ Redis connected successfully","timestamp":"2025-02-28T07:42:47.864Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T07:42:49.921Z"}
+{"level":"info","message":"⏳ Task reset job scheduled to run every round hour.","timestamp":"2025-02-28T07:43:39.443Z"}
+{"level":"info","message":"🚀 Server running on port 5001","timestamp":"2025-02-28T07:43:39.447Z"}
+{"level":"info","message":"✅ Redis connected successfully","timestamp":"2025-02-28T07:43:39.451Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T07:43:40.663Z"}
+{"level":"info","message":"⏳ Task reset job scheduled to run every round hour.","timestamp":"2025-02-28T07:45:00.124Z"}
+{"level":"info","message":"🚀 Server running on port 5001","timestamp":"2025-02-28T07:45:00.128Z"}
+{"level":"info","message":"✅ Redis connected successfully","timestamp":"2025-02-28T07:45:00.132Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T07:45:01.540Z"}
+{"level":"info","message":"⏳ Task reset job scheduled to run every round hour.","timestamp":"2025-02-28T07:45:32.636Z"}
+{"level":"info","message":"🚀 Server running on port 5001","timestamp":"2025-02-28T07:45:32.640Z"}
+{"level":"info","message":"✅ Redis connected successfully","timestamp":"2025-02-28T07:45:32.643Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T07:45:33.820Z"}
+{"level":"info","message":"⏳ Task reset job scheduled to run every round hour.","timestamp":"2025-02-28T07:45:52.466Z"}
+{"level":"info","message":"🚀 Server running on port 5001","timestamp":"2025-02-28T07:45:52.470Z"}
+{"level":"info","message":"✅ Redis connected successfully","timestamp":"2025-02-28T07:45:52.474Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T07:45:53.693Z"}
+{"level":"info","message":"⏳ Task reset job scheduled to run every round hour.","timestamp":"2025-02-28T07:46:03.359Z"}
+{"level":"info","message":"🚀 Server running on port 5001","timestamp":"2025-02-28T07:46:03.363Z"}
+{"level":"info","message":"✅ Redis connected successfully","timestamp":"2025-02-28T07:46:03.368Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T07:46:04.642Z"}
+{"level":"info","message":"⏳ Task reset job scheduled to run every round hour.","timestamp":"2025-02-28T07:46:12.326Z"}
+{"level":"info","message":"🚀 Server running on port 5001","timestamp":"2025-02-28T07:46:12.330Z"}
+{"level":"info","message":"✅ Redis connected successfully","timestamp":"2025-02-28T07:46:12.334Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T07:46:13.570Z"}
+{"level":"info","message":"⏳ Task reset job scheduled to run every round hour.","timestamp":"2025-02-28T07:46:29.461Z"}
+{"level":"info","message":"🚀 Server running on port 5001","timestamp":"2025-02-28T07:46:29.464Z"}
+{"level":"info","message":"✅ Redis connected successfully","timestamp":"2025-02-28T07:46:29.471Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T07:46:30.633Z"}
+{"level":"info","message":"⏳ Task reset job scheduled to run every round hour.","timestamp":"2025-02-28T07:47:21.646Z"}
+{"level":"info","message":"🚀 Server running on port 5001","timestamp":"2025-02-28T07:47:21.649Z"}
+{"level":"info","message":"✅ Redis connected successfully","timestamp":"2025-02-28T07:47:21.652Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T07:47:23.668Z"}
+{"level":"info","message":"⏳ Task reset job scheduled to run every round hour.","timestamp":"2025-02-28T07:47:45.758Z"}
+{"level":"info","message":"🚀 Server running on port 5001","timestamp":"2025-02-28T07:47:45.762Z"}
+{"level":"info","message":"✅ Redis connected successfully","timestamp":"2025-02-28T07:47:45.769Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T07:47:47.077Z"}
+{"level":"info","message":"⏳ Task reset job scheduled to run every round hour.","timestamp":"2025-02-28T07:48:02.735Z"}
+{"level":"info","message":"🚀 Server running on port 5001","timestamp":"2025-02-28T07:48:02.738Z"}
+{"level":"info","message":"✅ Redis connected successfully","timestamp":"2025-02-28T07:48:02.744Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T07:48:04.037Z"}
+{"level":"info","message":"⏳ Task reset job scheduled to run every round hour.","timestamp":"2025-02-28T07:48:27.187Z"}
+{"level":"info","message":"🚀 Server running on port 5001","timestamp":"2025-02-28T07:48:27.190Z"}
+{"level":"info","message":"✅ Redis connected successfully","timestamp":"2025-02-28T07:48:27.195Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T07:48:28.416Z"}
+{"level":"info","message":"⏳ Task reset job scheduled to run every round hour.","timestamp":"2025-02-28T07:49:14.511Z"}
+{"level":"info","message":"🚀 Server running on port 5001","timestamp":"2025-02-28T07:49:14.514Z"}
+{"level":"info","message":"✅ Redis connected successfully","timestamp":"2025-02-28T07:49:14.519Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T07:49:16.001Z"}
+{"level":"info","message":"⏳ Task reset job scheduled to run every round hour.","timestamp":"2025-02-28T07:49:36.496Z"}
+{"level":"info","message":"🚀 Server running on port 5001","timestamp":"2025-02-28T07:49:36.500Z"}
+{"level":"info","message":"✅ Redis connected successfully","timestamp":"2025-02-28T07:49:36.503Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T07:49:37.721Z"}
+{"level":"info","message":"⏳ Task reset job scheduled to run every round hour.","timestamp":"2025-02-28T07:53:08.467Z"}
+{"level":"info","message":"🚀 Server running on port 5001","timestamp":"2025-02-28T07:53:08.470Z"}
+{"level":"info","message":"✅ Redis connected successfully","timestamp":"2025-02-28T07:53:08.475Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T07:53:09.867Z"}
+{"level":"info","message":"⏳ Task reset job scheduled to run every round hour.","timestamp":"2025-02-28T07:53:25.562Z"}
+{"level":"info","message":"🚀 Server running on port 5001","timestamp":"2025-02-28T07:53:25.566Z"}
+{"level":"info","message":"✅ Redis connected successfully","timestamp":"2025-02-28T07:53:25.574Z"}
+{"level":"info","message":"✅ MongoDB Connected","timestamp":"2025-02-28T07:53:26.928Z"}
+{"level":"info","message":"⏳ Running scheduled task reset job...","timestamp":"2025-02-28T08:00:00.151Z"}
+{"level":"info","message":"🛑 Server shutting down...","timestamp":"2025-02-28T08:08:46.830Z"}

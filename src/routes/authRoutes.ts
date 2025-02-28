@@ -1,10 +1,10 @@
 import express from "express";
 import {
-  verifyUser,
-  getUserById,
+  verifyUserHandler,
+  getUserByIdHandler,
   sendVerificationEmailHandler,
   verifyEmailHandler,
-  updateUser,
+  updateUserHandler,
 } from "../controllers/authController";
 import { verifyToken } from "../middlewares/authMiddleware";
 import { apiLimiter } from "../middlewares/apiLimiter";
@@ -13,11 +13,11 @@ const router = express.Router();
 
 router.use(apiLimiter);
 
-router.post("/verify-user", verifyUser);
+router.post("/verify-user", verifyUserHandler);
 
-router.post("/update-user", verifyToken, updateUser);
+router.post("/update-user", verifyToken, updateUserHandler);
 
-router.get("/:userId", verifyToken, getUserById);
+router.get("/:userId", verifyToken, getUserByIdHandler);
 
 router.post(
   "/send-verification-email",

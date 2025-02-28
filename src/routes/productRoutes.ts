@@ -1,10 +1,10 @@
 import { Router } from "express";
 import {
-  createProduct,
-  getProducts,
-  updateProduct,
-  deleteProduct,
-  getCategories,
+  createProductHandler,
+  getProductsHandler,
+  updateProductHandler,
+  deleteProductHandler,
+  getCategoriesHandler,
 } from "../controllers/productController";
 import {
   ensureEmailVerified,
@@ -23,21 +23,21 @@ router.use(ensureEmailVerified);
  * @description Creates a new product.
  * @access Public
  */
-router.post("/", createProduct);
+router.post("/", createProductHandler);
 
 /**
  * @route GET /products
  * @description Retrieves a list of products with pagination and optional filtering.
  * @access Public
  */
-router.get("/", getProducts);
+router.get("/", getProductsHandler);
 
 /**
  * @route GET /products/categories
  * @description Retrieves a list of unique product categories.
  * @access Public
  */
-router.get("/categories", getCategories);
+router.get("/categories", getCategoriesHandler);
 
 /**
  * @route PUT /products/:product_id
@@ -45,7 +45,7 @@ router.get("/categories", getCategories);
  * @param product_id - The ID of the product to update.
  * @access Public
  */
-router.put("/:product_id", updateProduct);
+router.put("/:product_id", updateProductHandler);
 
 /**
  * @route DELETE /products/:product_id
@@ -53,6 +53,6 @@ router.put("/:product_id", updateProduct);
  * @param product_id - The ID of the product to delete.
  * @access Public
  */
-router.delete("/:product_id", deleteProduct);
+router.delete("/:product_id", deleteProductHandler);
 
 export default router;

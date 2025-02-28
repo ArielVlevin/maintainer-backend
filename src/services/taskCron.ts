@@ -1,16 +1,17 @@
 import cron from "node-cron";
 import { Task } from "../models/Task";
+import logger from "../utils/logger";
 
 /**
  * Schedules a cron job to reset completed tasks every night at midnight.
  */
 export const scheduleTaskResetJob = () => {
   cron.schedule("0 * * * *", async () => {
-    console.log("⏳ Running scheduled task reset job...");
+    logger.info("⏳ Running scheduled task reset job...");
     await resetCompletedTasks();
   });
 
-  console.log("⏳ Task reset job scheduled to run every round hour.");
+  logger.info("⏳ Task reset job scheduled to run every round hour.");
 };
 
 /**
@@ -26,6 +27,6 @@ export const resetCompletedTasks = async () => {
       { $set: { status: "inactive" } }
     );
   } catch (error) {
-    console.error("❌ Error resetting tasks:", error);
+    logger.error("❌ Error resetting tasks:", error);
   }
 };
