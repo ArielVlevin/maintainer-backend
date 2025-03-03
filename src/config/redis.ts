@@ -25,14 +25,51 @@ export const connectRedis = async () => {
 };
 
 /**
+ * Checks if Redis connection is active.
+ */
+export const isRedisConnected = async (): Promise<boolean> => {
+  try {
+    if (redisClient.isOpen) {
+      await redisClient.ping(); // בדיקת חיבור
+      return true;
+    }
+    return false;
+  } catch (error) {
+    logger.error("⚠️ Redis connection check failed:", error);
+    return false;
+  }
+};
+
+export const flushRedis = async () => {
+  try {
+    if (await isRedisConnected()) {
+      await redisClient.flushAll();
+      logger.info("🧹 Redis cache cleared");
+    }
+  } catch (error) {
+    logger.error("⚠️ Error flushing Redis:", error);
+  }
+};
+
+/**
  * Stores a verification token in Redis for 1 hour.
  * @param email - The user's email.
  * @param token - The verification token.
  */
 export async function setVerificationToken(email: string, token: string) {
-  await redisClient.set(`verify:${token}`, email, { EX: 3600 });
+  try {
+    if (!(await isRedisConnected())) throw new Error("Redis is not connected");
+    await redisClient.set(`verify:${token}`, email, { EX: 3600 });
+  } catch (error) {
+    logger.error("❌ Failed to set verification token:", error);
+  }
 }
 
+/**
+ * Retrieves the email associated with a verification token.
+ * @param token - The verification token.
+ * @returns The associated email, or null if not found.
+ */
 /**
  * Retrieves the email associated with a verification token.
  * @param token - The verification token.
@@ -41,7 +78,13 @@ export async function setVerificationToken(email: string, token: string) {
 export async function getVerificationEmail(
   token: string
 ): Promise<string | null> {
-  return await redisClient.get(`verify:${token}`);
+  try {
+    if (!(await isRedisConnected())) throw new Error("Redis is not connected");
+    return await redisClient.get(`verify:${token}`);
+  } catch (error) {
+    logger.error("❌ Failed to get verification email:", error);
+    return null;
+  }
 }
 
 /**
@@ -49,7 +92,12 @@ export async function getVerificationEmail(
  * @param token - The verification token.
  */
 export async function deleteVerificationToken(token: string) {
-  await redisClient.del(`verify:${token}`);
+  try {
+    if (!(await isRedisConnected())) throw new Error("Redis is not connected");
+    await redisClient.del(`verify:${token}`);
+  } catch (error) {
+    logger.error("❌ Failed to delete verification token:", error);
+  }
 }
 
 /**

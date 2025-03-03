@@ -7,21 +7,32 @@ import {
 } from "../../../src/services/authService";
 import { id } from "../../../src/types/MongoDB";
 
+import {
+  jest,
+  describe,
+  it,
+  expect,
+  beforeAll,
+  afterAll,
+  beforeEach,
+} from "@jest/globals";
+
 describe("🧪 User Service Tests", () => {
   let user_id: id;
   let token: string;
+  let userEmail = `test${Date.now()}@example.com`;
 
   it("✅ Should create a new user", async () => {
-    const user = await createUserIfNotExists("test3@example.com", "Test User");
+    const user = await createUserIfNotExists(userEmail, "Test User");
     expect(user).toBeDefined();
-    expect(user.email).toBe("test@example.com");
+    expect(user.email).toBe(userEmail);
     user_id = user._id;
   });
 
   it("✅ Should find user by ID", async () => {
     const user = await findUserById(user_id);
     expect(user).toBeDefined();
-    expect(user?.email).toBe("test@example.com");
+    expect(user?.email).toBe(userEmail);
   });
 
   it("✅ Should update user details", async () => {

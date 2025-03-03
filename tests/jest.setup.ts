@@ -5,6 +5,16 @@ import redisClient, {
   disconnectRedis,
 } from "../src/config/redis";
 
+import {
+  jest,
+  describe,
+  it,
+  expect,
+  beforeAll,
+  afterAll,
+  beforeEach,
+} from "@jest/globals";
+
 beforeAll(async () => {
   process.env.NODE_ENV = "test";
   await connectDB();

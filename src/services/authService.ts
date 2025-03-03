@@ -7,7 +7,7 @@ import {
 import { DBError, ValidationError } from "../utils/CustomError";
 import { id } from "../types/MongoDB";
 import crypto from "crypto";
-import { sendVerificationEmail } from "./emailServices";
+import { sendVerificationEmail } from "./emailService";
 
 /**
  * Ensures that a user exists in the database.
@@ -77,7 +77,8 @@ export async function generateAndSendVerificationEmail(
   email: string
 ): Promise<string> {
   if (!email) throw new DBError("Email is required.");
-
+  //todo: delete later
+  console.log("for TEST: 🔑 Generating verification token...");
   const token = crypto.randomBytes(32).toString("hex");
 
   await setVerificationToken(email, token);

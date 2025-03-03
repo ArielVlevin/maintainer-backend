@@ -1,10 +1,11 @@
 import { NextFunction } from "express";
 import { Task } from "../models/Task";
-import { addTimeToDate } from "../utils/dateUtils";
+import { addTimeToDate, calculateMaintenanceWindow } from "../utils/dateUtils";
 import { findProductById } from "./productService";
 import { DBError } from "../utils/CustomError";
 import { id, isValidId } from "../types/MongoDB";
 import { updateData, updateEntity } from "../utils/updateData";
+import { TaskQueryParams } from "../types/QueryParams";
 
 export const findTaskById = async (task_id: string | id) => {
   if (!isValidId(task_id)) throw new DBError("Invalid Task ID");
@@ -43,9 +44,21 @@ export const createTask = async (
 ) => {
   const product = await findProductById(product_id);
 
-  const nextMaintenance = addTimeToDate(
-    taskData.lastMaintenance,
-    taskData.frequency
+  if (!taskData.taskName || taskData.isRecurring === undefined)
+    throw new DBError("Missing required fields");
+
+  //להוסיף לטסק דאטא את המערך החדש ולמחוק את הנקסט
+
+  let lastMaintenance: Date | undefined = undefined;
+  if (taskData.isRecurring && taskData.lastMaintenance)
+    lastMaintenance = new Date(taskData.lastMaintenance);
+
+  let frequency: number | undefined = undefined;
+  if (taskData.isRecurring && taskData.frequency)
+    frequency = taskData.frequency;
+
+  const nextMaintenance: Date = new Date(
+    taskData.maintenanceWindowDates.startDate
   );
 
   const newTask = new Task({
@@ -53,8 +66,10 @@ export const createTask = async (
     user_id,
     taskName: taskData.taskName,
     description: taskData.description,
-    lastMaintenance: taskData.lastMaintenance,
+    lastMaintenance,
     frequency: taskData.frequency,
+    isRecurring: taskData.isRecurring,
+    maintenanceWindowDays: taskData.maintenanceWindowDays,
     nextMaintenance,
   });
 
@@ -104,17 +119,20 @@ export const deleteTask = async (task_id: string | id) => {
  * @param filters - The query filters.
  * @returns The list of tasks matching the filters.
  */
-export const getTasks = async (user_id: id, filters: any) => {
-  const { taskId, productId, page = 1, limit = 10, status, search } = filters;
+export const getTasks = async (
+  user_id: id | string,
+  filters: TaskQueryParams
+) => {
+  const { task_id, product_id, page = 1, limit = 10, status, search } = filters;
 
-  const skip = (parseInt(page as string) - 1) * parseInt(limit as string);
+  const skip = (parseInt(String(page)) - 1) * parseInt(String(limit));
 
   // Fetch a single task if taskId is provided
-  if (taskId) {
-    if (!isValidId(taskId)) throw new DBError("Invalid Task ID");
+  if (task_id) {
+    if (!isValidId(task_id)) throw new DBError("Invalid Task ID");
 
     const task = await Task.findOne({
-      _id: taskId,
+      _id: task_id,
       user_id,
     }).populate("product_id", "name category");
 
@@ -130,15 +148,18 @@ export const getTasks = async (user_id: id, filters: any) => {
   }
 
   // Apply filters for task search
-  const query: any = { user_id: user_id };
-  if (productId) query.product_id = productId;
+  const query: any = {};
+  query.user_id = user_id;
+  if (product_id) query.product_id = product_id;
   if (status) query.status = status;
   if (search) query.taskName = { $regex: search, $options: "i" };
+
+  console.log("Query: ", query);
 
   const tasks = await Task.find(query)
     .sort({ nextMaintenance: 1 }) // Sort by next maintenance date
     .skip(skip)
-    .limit(parseInt(limit as string))
+    .limit(parseInt(String(limit)))
     .populate("product_id", "name category");
 
   const total = await Task.countDocuments(query);
@@ -147,8 +168,8 @@ export const getTasks = async (user_id: id, filters: any) => {
     success: true,
     items: tasks,
     total,
-    page: parseInt(page as string),
-    totalPages: Math.ceil(total / parseInt(limit as string)),
+    page: parseInt(String(page)),
+    totalPages: Math.ceil(total / parseInt(String(limit))),
   };
 };
 
@@ -160,12 +181,15 @@ export const getTasks = async (user_id: id, filters: any) => {
 export const completeTask = async (task_id: string | id) => {
   if (!isValidId(task_id)) throw new DBError("Invalid Task ID");
 
-  const task = await Task.findById(task_id);
-  if (!task) throw new DBError("Task not found");
+  const task = await findTaskById(task_id);
 
   task.status = "completed";
   task.lastMaintenance = new Date();
-  task.nextMaintenance = addTimeToDate(task.lastMaintenance, task.frequency);
+
+  if (task.isRecurring) {
+    task.maintenanceWindowDates = calculateMaintenanceWindow(task);
+    task.nextMaintenance = task.maintenanceWindowDates?.startDate;
+  } else task.nextMaintenance = undefined;
 
   await task.save();
   return task;
@@ -182,6 +206,8 @@ export const postponeTask = async (task_id: id | string, days: number) => {
 
   const task = await Task.findById(task_id);
   if (!task) throw new DBError("Task not found");
+  if (!task.nextMaintenance)
+    throw new DBError("Next maintenance date is not set");
 
   task.nextMaintenance = addTimeToDate(task.nextMaintenance, days);
   await task.save();

@@ -17,7 +17,7 @@ const router = Router();
 router.use(verifyToken);
 router.use(ensureEmailVerified);
 
-router.use(requestLogger);
+// todo:repair:router.use(requestLogger);
 
 router.post("/", createProductHandler);
 

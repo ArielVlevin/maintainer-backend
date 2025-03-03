@@ -18,6 +18,7 @@ export const verifyUserHandler = async (
   try {
     const { email, name } = req.body;
     const user = await createUserIfNotExists(email, name);
+
     sendSuccessResponse(res, user, "User verified successfully");
   } catch (error) {
     next(error);
@@ -63,6 +64,7 @@ export const sendVerificationEmailHandler = async (
   try {
     const user_id = validateUserAuth(req);
     await sendVerification(user_id);
+
     sendSuccessResponse(res, null, "Verification email sent.");
   } catch (error) {
     next(error);
@@ -77,6 +79,7 @@ export const verifyEmailHandler = async (
   try {
     const { token } = req.body;
     const result = await verifyEmailToken(token);
+
     sendSuccessResponse(res, result, "Email verification processed.");
   } catch (error) {
     next(error);

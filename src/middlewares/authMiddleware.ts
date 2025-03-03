@@ -45,7 +45,6 @@ export const verifyToken = async (
       const user = await User.findById(decoded._id);
       if (!user) throw new Error("User not found");
 
-      console.log("user: ", user);
       req.user = user;
       next();
     } catch (error) {

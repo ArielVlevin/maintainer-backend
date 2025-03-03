@@ -1,4 +1,5 @@
 import { addDays, addHours, parseISO } from "date-fns";
+import { ITask } from "../models/Task";
 
 /**
  * Adds days and hours to a given date.
@@ -25,3 +26,16 @@ export function addTimeToDate(
 
   return updatedDate;
 }
+
+export const calculateMaintenanceWindow = (task: ITask) => {
+  if (!task.isRecurring || !task.frequency || !task.maintenanceWindowDays)
+    return undefined;
+
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() + task.frequency);
+
+  const endDate = new Date(startDate);
+  endDate.setDate(endDate.getDate() + task.maintenanceWindowDays);
+
+  return { startDate, endDate };
+};

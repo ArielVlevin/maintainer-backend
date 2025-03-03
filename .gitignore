@@ -1,6 +1,41 @@
+# Node.js dependencies
 node_modules/
+npm-debug.log
+yarn-error.log
 .env
+.env.local
+.env.development
+.env.production
+.env.test
+logs
+*.log
+*.gz
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Docker ignore
+docker-compose.override.yml
+*.tar
+*.img
+*.lock
+
+# Build artifacts
 dist/
 build/
-uploads/
+.cache/
+.out/
+.next/
+coverage/
+
+# IDE/Editor files
+.vscode/
+.idea/
 .DS_Store
+Thumbs.db
+
+# Git and CI/CD
+.git/
+.github/
+.gitlab/

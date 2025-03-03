@@ -10,6 +10,7 @@ import {
 } from "../services/taskService";
 import { validateUserAuth } from "../utils/validationUtils";
 import { sendSuccessResponse } from "../services/apiResponse";
+import { TaskQueryParams } from "../types/QueryParams";
 
 /**
  * @route   POST /tasks/:product_id
@@ -79,7 +80,8 @@ export const getTasksHandler = async (
 ) => {
   try {
     const user_id = validateUserAuth(req);
-    const tasks = await getTasks(user_id, req.query);
+    const params = (req.query.params as TaskQueryParams) || {};
+    const tasks = await getTasks(user_id, params);
     sendSuccessResponse(res, tasks, "Tasks retrieved successfully");
   } catch (error) {
     next(error);

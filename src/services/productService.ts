@@ -5,6 +5,10 @@ import { logAction } from "../services/logAction";
 import { DBError } from "../utils/CustomError";
 import { id, isValidId } from "../types/MongoDB";
 import { updateData, updateEntity } from "../utils/updateData";
+import logger from "../utils/logger";
+import { extractTags } from "../utils/stringUtils";
+import { Task } from "../models/Task";
+import { ProductQueryParams } from "../types/QueryParams";
 
 /**
  * Finds a product by ID and throws an error if not found.
@@ -59,7 +63,7 @@ export const createProduct = async (user_id: id, productData: any) => {
     category,
     manufacturer,
     model,
-    tags,
+    tags: extractTags(tags),
     purchaseDate,
     tasks: [],
     iconUrl: url,
@@ -71,6 +75,7 @@ export const createProduct = async (user_id: id, productData: any) => {
     $push: { products: newProduct._id },
   });
 
+  /*
   await logAction(
     user_id,
     "CREATE",
@@ -78,7 +83,7 @@ export const createProduct = async (user_id: id, productData: any) => {
     newProduct._id,
     `Product "${newProduct.name}" was created`
   );
-
+*/
   return newProduct;
 };
 
@@ -99,16 +104,16 @@ export const updateProduct = async (
  * @param queryParams - Query parameters for filtering and pagination.
  * @returns List of products.
  */
-export const getProducts = async (queryParams: any) => {
+export const getProducts = async (queryParams: ProductQueryParams) => {
   const {
-    productId,
+    product_id,
     slug,
     page = "1",
     limit = "10",
     search,
     category,
     fields,
-    userOnly,
+    userOnly = true,
     user_id,
   } = queryParams;
 
@@ -116,12 +121,12 @@ export const getProducts = async (queryParams: any) => {
   const limitNumber = Math.max(parseInt(limit as string, 10), 1);
   const skip = (pageNumber - 1) * limitNumber;
 
-  if (productId || slug) {
+  if (product_id || slug) {
     let product;
-    if (productId) {
-      if (!isValidId(productId)) throw new DBError("Invalid Product ID");
+    if (product_id) {
+      if (!isValidId(product_id)) throw new DBError("Invalid Product ID");
 
-      product = await Product.findById(productId)
+      product = await Product.findById(product_id)
         .populate("lastOverallMaintenance")
         .populate("nextOverallMaintenance")
         .lean();
@@ -145,7 +150,7 @@ export const getProducts = async (queryParams: any) => {
   const query: any = {};
   if (search) query.name = { $regex: search, $options: "i" };
   if (category) query.category = category;
-  if (userOnly === "true" && user_id) query.user_id = user_id;
+  if (userOnly && user_id) query.user_id = user_id;
 
   const fieldsParam = Array.isArray(fields) ? fields[0] : fields;
   const projection = fieldsParam
@@ -181,6 +186,7 @@ export const deleteProduct = async (product_id: id | string, user_id: id) => {
   await product.deleteOne();
   await User.findByIdAndUpdate(user_id, { $pull: { products: product_id } });
 
+  /*
   await logAction(
     user_id,
     "DELETE",
@@ -188,7 +194,7 @@ export const deleteProduct = async (product_id: id | string, user_id: id) => {
     product_id as id,
     `Product "${product.name}" was deleted`
   );
-
+*/
   return { message: "Product deleted successfully" };
 };
 
@@ -199,4 +205,33 @@ export const deleteProduct = async (product_id: id | string, user_id: id) => {
 export const getCategories = async () => {
   const categories = await Product.distinct("category");
   return categories.filter((category) => category && category.trim() !== "");
+};
+
+/**
+ * Automatically updates a product's status based on its tasks.
+ *
+ * @param productId - The ID of the product to update
+ */
+export const updateProductStatus = async (product_id: string | id) => {
+  try {
+    const product = await findProductById(product_id);
+    const tasks = await Task.find({ product_id: product_id });
+
+    let newStatus = "healthy";
+
+    if (tasks.length)
+      if (tasks.some((task) => task.status === "overdue"))
+        newStatus = "overdue";
+      else if (tasks.some((task) => task.status === "maintenance"))
+        newStatus = "maintenance";
+
+    if (product.status !== newStatus) {
+      await Product.findByIdAndUpdate(product_id, { status: newStatus });
+      logger.info(
+        `🔄 Product ${product_id} status updated to ${newStatus.toUpperCase()}`
+      );
+    }
+  } catch (error) {
+    logger.error("❌ Error updating product status:", error);
+  }
 };

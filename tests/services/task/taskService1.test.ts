@@ -8,6 +8,15 @@ import {
   completeTask,
 } from "../../../src/services/taskService";
 import { id } from "../../../src/types/MongoDB";
+import {
+  jest,
+  describe,
+  it,
+  expect,
+  beforeAll,
+  afterAll,
+  beforeEach,
+} from "@jest/globals";
 
 describe("🛠 Task Service Tests", () => {
   let task_id: id;
@@ -15,7 +24,8 @@ describe("🛠 Task Service Tests", () => {
   let product_id: id;
 
   beforeAll(async () => {
-    const user = await createUserIfNotExists("test2@example.com", "Test User");
+    const userEmail = `test${Date.now()}@example.com`;
+    const user = await createUserIfNotExists(userEmail, "Test User");
     user_id = user._id;
 
     const product = await createProduct(user_id, {

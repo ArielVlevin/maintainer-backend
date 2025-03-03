@@ -7,6 +7,15 @@ import {
 
 import { createTask } from "../../../src/services/taskService";
 import { id } from "../../../src/types/MongoDB";
+import {
+  jest,
+  describe,
+  it,
+  expect,
+  beforeAll,
+  afterAll,
+  beforeEach,
+} from "@jest/globals";
 
 describe("🧪 Calendar Service Tests", () => {
   let user_id: id;
@@ -14,7 +23,8 @@ describe("🧪 Calendar Service Tests", () => {
   let task_id: id;
 
   beforeAll(async () => {
-    const user = await createUserIfNotExists("test1@example.com", "Test User");
+    const userEmail = `test${Date.now()}@example.com`;
+    const user = await createUserIfNotExists(userEmail, "Test User");
     user_id = user._id;
 
     const product = await createProduct(user_id, {

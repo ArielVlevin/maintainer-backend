@@ -9,6 +9,8 @@ import {
   updateProduct,
 } from "../services/productService";
 import { sendSuccessResponse } from "../services/apiResponse";
+import logger from "../utils/logger";
+import { ProductQueryParams } from "../types/QueryParams";
 
 /**
  * @route   POST /products
@@ -59,8 +61,9 @@ export const getProductsHandler = async (
   next: NextFunction
 ) => {
   try {
-    const user_id = req.user?._id?.toString();
-    const products = await getProducts({ ...req.query, user_id });
+    const user_id = validateUserAuth(req);
+    const params = (req.query.params as ProductQueryParams) || {};
+    const products = await getProducts({ ...params, user_id });
     sendSuccessResponse(res, products, "Products fetched successfully");
   } catch (error) {
     next(error);

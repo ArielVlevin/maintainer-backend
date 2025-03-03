@@ -2,11 +2,16 @@
  * @interface IProduct
  * @description Represents a product that requires maintenance.
  */
+
+export type ProductStatus = "healthy" | "maintenance" | "overdue";
+
 export interface IProduct extends Document {
   _id: id;
   name: string; // Product name
   slug: string;
   user_id: id;
+
+  status: ProductStatus;
 
   category?: string; // Optional: Product category
   manufacturer?: string; // Optional: Manufacturer name
@@ -22,6 +27,8 @@ export interface IProduct extends Document {
   iconUrl?: string; // URL for the product's icon or image
   createdAt: Date;
   updatedAt: Date;
+
+  notificationPreferences?: number[]; // Optional: Notification preferences
 }
 
 import mongoose, { Schema, Model } from "mongoose";
@@ -52,6 +59,17 @@ const ProductSchema = new Schema<IProduct>({
   lastOverallMaintenance: { type: mongoose.Schema.Types.ObjectId, ref: "Task" },
   nextOverallMaintenance: { type: mongoose.Schema.Types.ObjectId, ref: "Task" },
   iconUrl: { type: String, default: "/uploads/default-product.png" },
+
+  status: {
+    type: String,
+    enum: ["maintenance", "overdue", "healthy"],
+    default: "healthy",
+  },
+
+  notificationPreferences: {
+    type: [Number],
+    default: [1, 0], // Default: notify 1 day before and on the due date
+  },
 });
 
 /**
