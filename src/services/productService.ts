@@ -63,12 +63,13 @@ export const createProduct = async (user_id: id, productData: any) => {
     category,
     manufacturer,
     model,
-    tags: extractTags(tags),
+    tags,
     purchaseDate,
     tasks: [],
     iconUrl: url,
   });
 
+  console.log("*****createProduct:::: newProduct", newProduct);
   await newProduct.save();
 
   await User.findByIdAndUpdate(user_id, {
